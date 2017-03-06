@@ -34,7 +34,7 @@ func Run(ctx *Context) interface{} {
 			name := action.(string)
 			fn := ctx.Sandbox[name]
 			if fn == nil {
-				Error(ctx, "function is undefined: "+name)
+				ctx.Error("function is undefined: " + name)
 			}
 			return fn(ctx)
 		}
@@ -46,7 +46,7 @@ func Run(ctx *Context) interface{} {
 }
 
 // Error used to throw error
-func Error(ctx *Context, msg string) {
+func (ctx *Context) Error(msg string) {
 	stack := []interface{}{}
 	node := ctx
 
