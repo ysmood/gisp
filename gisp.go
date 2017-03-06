@@ -86,3 +86,8 @@ func (ctx *Context) Arg(index int) interface{} {
 		Parent:  ctx,
 	})
 }
+
+// Arg sugar
+func (ctx *Context) Len() int {
+	return len(ctx.AST.([]interface{}))
+}
