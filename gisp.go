@@ -15,12 +15,12 @@ type Context struct {
 }
 
 type GispError struct {
-	message string
-	stack   []interface{}
+	Message string
+	Stack   []interface{}
 }
 
 func (e GispError) Error() string {
-	return e.message
+	return e.Message
 }
 
 // Run entrance
@@ -57,8 +57,8 @@ func (ctx *Context) Error(msg string) {
 	}
 
 	panic(GispError{
-		message: msg,
-		stack:   stack,
+		Message: msg,
+		Stack:   stack,
 	})
 }
 
