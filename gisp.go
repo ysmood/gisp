@@ -78,8 +78,14 @@ func RunJSON(code []byte, ctx *Context) (ret interface{}, err error) {
 
 // Arg sugar
 func (ctx *Context) Arg(index int) interface{} {
+	ast := ctx.AST.([]interface{})
+
+	if index >= len(ast) {
+		return nil
+	}
+
 	return Run(&Context{
-		AST:     ctx.AST.([]interface{})[index],
+		AST:     ast[index],
 		Sandbox: ctx.Sandbox,
 		ENV:     ctx.ENV,
 		Index:   index,
