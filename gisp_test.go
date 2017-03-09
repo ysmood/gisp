@@ -2,6 +2,7 @@ package gisp_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -90,8 +91,37 @@ func TestMissName(t *testing.T) {
 	})
 }
 
+func TestRuntimeErr(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("should panic")
+		} else {
+			assert.Equal(
+				t,
+				"[foo 1 @ 2 @ 0]",
+				fmt.Sprint(r.(gisp.GispError).Stack),
+			)
+		}
+	}()
+
+	gisp.RunJSON([]byte(`["@", ["@", 1, 1], ["@", ["foo"], 1]]`), &gisp.Context{
+		Sandbox: gisp.Sandbox{
+			"foo": func(ctx *gisp.Context) interface{} {
+				a := []int{}
+				a[100] = 1
+				return nil
+			},
+			"@": func(ctx *gisp.Context) interface{} {
+				ctx.Arg(1)
+				ctx.Arg(2)
+				return nil
+			},
+		},
+	})
+}
+
 func BenchmarkAST(b *testing.B) {
-	code := []byte(`["+", ["+", 1, 1], ["+", 1, 1]]`)
+	code := []byte(`["+", ["+", 1, 1], ["+", 1, ["+", 1, ["+", 1, ["+", 1, ["+", 1, ["+", 1, 1]]]]]]]`)
 	var ast interface{}
 	json.Unmarshal(code, &ast)
 

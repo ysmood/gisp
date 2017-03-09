@@ -23,8 +23,20 @@ func (e GispError) Error() string {
 	return e.Message
 }
 
+func (ctx *Context) liftPanic() {
+	if r := recover(); r != nil {
+		err, ok := r.(GispError)
+		if ok {
+			panic(err)
+		} else {
+			ctx.Error(r.(error).Error())
+		}
+	}
+}
+
 // Run entrance
 func Run(ctx *Context) interface{} {
+
 	switch ctx.AST.(type) {
 	case []interface{}:
 		action := ctx.Arg(0)
@@ -36,9 +48,11 @@ func Run(ctx *Context) interface{} {
 			if fn == nil {
 				ctx.Error("function is undefined: " + name)
 			}
+			defer ctx.liftPanic()
 			return fn(ctx)
 		}
 
+		defer ctx.liftPanic()
 		return action.(func(*Context) interface{})(ctx)
 	}
 
