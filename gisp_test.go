@@ -74,7 +74,7 @@ func TestMissName(t *testing.T) {
 		} else {
 			assert.Equal(
 				t,
-				"function is undefined: foo",
+				"function \"foo\" is undefined",
 				r.(error).Error(),
 			)
 		}

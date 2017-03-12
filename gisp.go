@@ -46,7 +46,7 @@ func Run(ctx *Context) interface{} {
 			name := action.(string)
 			fn := ctx.Sandbox[name]
 			if fn == nil {
-				ctx.Error("function is undefined: " + name)
+				ctx.Error("function \"" + name + "\" is undefined")
 			}
 			defer ctx.liftPanic()
 			return fn(ctx)
