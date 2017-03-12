@@ -46,6 +46,16 @@ func TestReturnFn(t *testing.T) {
 	assert.Equal(t, float64(3), out)
 }
 
+func TestStr(t *testing.T) {
+	sandbox := gisp.Sandbox{}
+
+	out, _ := gisp.RunJSON([]byte(`"foo"`), &gisp.Context{
+		Sandbox: sandbox,
+	})
+
+	assert.Equal(t, "foo", out)
+}
+
 func TestAST(t *testing.T) {
 	code := []byte(`["*", ["*", 2, 5], ["*", 9, 3]]`)
 	var ast interface{}
