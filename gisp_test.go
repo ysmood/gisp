@@ -7,7 +7,27 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/ysmood/gisp"
+	"github.com/yuin/gopher-lua"
 )
+
+func Add(L *lua.LState) int {
+	a := L.ToInt(1)            /* get argument */
+	b := L.ToInt(2)            /* get argument */
+	L.Push(lua.LNumber(a + b)) /* push result */
+	return 1                   /* number of results */
+}
+
+func BenchmarkLua(b *testing.B) {
+	L := lua.NewState()
+	defer L.Close()
+	L.SetGlobal("add", L.NewFunction(Add))
+
+	b.ResetTimer()
+
+	for n := 0; n < b.N; n++ {
+		L.DoString("add(1,1)")
+	}
+}
 
 func TestJSON(t *testing.T) {
 	sandbox := gisp.Sandbox{
@@ -131,7 +151,7 @@ func TestRuntimeErr(t *testing.T) {
 }
 
 func BenchmarkAST(b *testing.B) {
-	code := []byte(`["+", ["+", 1, 1], ["+", 1, ["+", 1, ["+", 1, ["+", 1, ["+", 1, ["+", 1, 1]]]]]]]`)
+	code := []byte(`["+", 1, 1]`)
 	var ast interface{}
 	json.Unmarshal(code, &ast)
 
