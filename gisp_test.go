@@ -129,7 +129,7 @@ func TestRuntimeErr(t *testing.T) {
 			assert.Equal(
 				t,
 				"[foo 1 @ 2 @ 0]",
-				fmt.Sprint(r.(gisp.GispError).Stack),
+				fmt.Sprint(r.(gisp.Error).Stack),
 			)
 		}
 	}()

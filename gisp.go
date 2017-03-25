@@ -14,18 +14,19 @@ type Context struct {
 	Parent  *Context
 }
 
-type GispError struct {
+// Error ...
+type Error struct {
 	Message string
 	Stack   []interface{}
 }
 
-func (e GispError) Error() string {
+func (e Error) Error() string {
 	return e.Message
 }
 
 func (ctx *Context) liftPanic() {
 	if r := recover(); r != nil {
-		err, ok := r.(GispError)
+		err, ok := r.(Error)
 		if ok {
 			panic(err)
 		} else {
@@ -36,7 +37,6 @@ func (ctx *Context) liftPanic() {
 
 // Run entrance
 func Run(ctx *Context) interface{} {
-
 	switch ctx.AST.(type) {
 	case []interface{}:
 		action := ctx.Arg(0)
@@ -70,7 +70,7 @@ func (ctx *Context) Error(msg string) {
 		node = node.Parent
 	}
 
-	panic(GispError{
+	panic(Error{
 		Message: msg,
 		Stack:   stack,
 	})
@@ -107,7 +107,7 @@ func (ctx *Context) Arg(index int) interface{} {
 	})
 }
 
-// Arg sugar
+// Len Arg sugar
 func (ctx *Context) Len() int {
 	return len(ctx.AST.([]interface{}))
 }
