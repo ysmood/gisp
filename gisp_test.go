@@ -12,12 +12,12 @@ import (
 
 func TestJSON(t *testing.T) {
 	sandbox := gisp.Sandbox{
-		"+": func(ctx *gisp.Context) interface{} {
+		"+": func(ctx *gisp.Context) float64 {
 			a := ctx.ArgNum(1)
 			b := ctx.ArgNum(2)
 			return a + b
 		},
-		"-": func(ctx *gisp.Context) interface{} {
+		"-": func(ctx *gisp.Context) float64 {
 			a := ctx.ArgNum(1)
 			b := ctx.ArgNum(2)
 			return a - b
@@ -34,8 +34,8 @@ func TestJSON(t *testing.T) {
 func TestReturnFn(t *testing.T) {
 	sandbox := gisp.Sandbox{
 		"foo": func(ctx *gisp.Context) interface{} {
-			return func(ctx *gisp.Context) interface{} {
-				return ctx.Arg(1).(float64) + ctx.Arg(2).(float64)
+			return func(ctx *gisp.Context) float64 {
+				return ctx.ArgNum(1) + ctx.ArgNum(2)
 			}
 		},
 	}
@@ -55,6 +55,47 @@ func TestStr(t *testing.T) {
 	})
 
 	assert.Equal(t, "foo", out)
+}
+
+func TestVal(t *testing.T) {
+	sandbox := gisp.Sandbox{
+		"test": "ok",
+	}
+
+	out, _ := gisp.RunJSON([]byte(`["test"]`), &gisp.Context{
+		Sandbox: sandbox,
+	})
+
+	assert.Equal(t, "ok", out)
+}
+
+func TestTypes(t *testing.T) {
+	sandbox := gisp.Sandbox{
+		"$": func(g *gisp.Context) interface{} {
+			return g.AST.([]interface{})[1]
+		},
+		"echo": func(g *gisp.Context) []interface{} {
+			return []interface{}{
+				g.ArgNum(1),
+				g.ArgBool(2),
+				g.ArgArr(3),
+				g.ArgObj(4),
+				g.ArgStr(5),
+			}
+		},
+	}
+
+	out, _ := gisp.RunJSON([]byte(`["echo", 1.2, true, ["$", []], {}, "ok"]`), &gisp.Context{
+		Sandbox: sandbox,
+	})
+
+	assert.Equal(t, []interface{}{
+		1.2,
+		true,
+		[]interface{}{},
+		map[string]interface{}{},
+		"ok",
+	}, out)
 }
 
 func TestAST(t *testing.T) {
@@ -85,21 +126,15 @@ func TestMissName(t *testing.T) {
 		} else {
 			assert.Equal(
 				t,
-				"function \"foo\" is undefined",
+				"\"foo\" is undefined",
 				r.(error).Error(),
 			)
 		}
 	}()
 
-	gisp.RunJSON([]byte(`["@", ["@", 1, 1], ["@", ["foo"], 1]]`), &gisp.Context{
+	gisp.RunJSON([]byte(`["foo"]`), &gisp.Context{
 		IsLiftPanic: true,
-		Sandbox: gisp.Sandbox{
-			"@": func(ctx *gisp.Context) interface{} {
-				ctx.Arg(1)
-				ctx.Arg(2)
-				return nil
-			},
-		},
+		Sandbox:     gisp.Sandbox{},
 	})
 }
 

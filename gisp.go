@@ -1,7 +1,7 @@
 package gisp
 
 // Sandbox sandbox
-type Sandbox map[string]func(*Context) interface{}
+type Sandbox map[string]interface{}
 
 // Context context
 type Context struct {
@@ -50,25 +50,39 @@ func (ctx *Context) liftPanic() {
 func Run(ctx *Context) interface{} {
 	switch ctx.AST.(type) {
 	case []interface{}:
-		action := ctx.Arg(0)
-
-		switch action.(type) {
-		case string:
-			name := action.(string)
-			fn := ctx.Sandbox[name]
-			if fn == nil {
-				ctx.Error("function \"" + name + "\" is undefined")
-			}
-			if ctx.IsLiftPanic {
-				defer ctx.liftPanic()
-			}
-			return fn(ctx)
-		}
-
 		if ctx.IsLiftPanic {
 			defer ctx.liftPanic()
 		}
-		return action.(func(*Context) interface{})(ctx)
+
+		val := ctx.Arg(0)
+
+		switch val.(type) {
+		case string:
+			var has bool
+			name := val.(string)
+			val, has = ctx.Sandbox[name]
+
+			if !has {
+				ctx.Error("\"" + name + "\" is undefined")
+			}
+		}
+
+		switch val.(type) {
+		case func(*Context) float64:
+			return val.(func(*Context) float64)(ctx)
+		case func(*Context) string:
+			return val.(func(*Context) string)(ctx)
+		case func(*Context) bool:
+			return val.(func(*Context) bool)(ctx)
+		case func(*Context) map[string]interface{}:
+			return val.(func(*Context) map[string]interface{})(ctx)
+		case func(*Context) []interface{}:
+			return val.(func(*Context) []interface{})(ctx)
+		case func(*Context) interface{}:
+			return val.(func(*Context) interface{})(ctx)
+		}
+
+		return val
 	}
 
 	return ctx.AST
