@@ -7,29 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/ysmood/gisp"
-	"github.com/yuin/gopher-lua"
 )
-
-func TestJSON(t *testing.T) {
-	sandbox := gisp.Sandbox{
-		"+": func(ctx *gisp.Context) float64 {
-			a := ctx.ArgNum(1)
-			b := ctx.ArgNum(2)
-			return a + b
-		},
-		"-": func(ctx *gisp.Context) float64 {
-			a := ctx.ArgNum(1)
-			b := ctx.ArgNum(2)
-			return a - b
-		},
-	}
-
-	out, _ := gisp.RunJSON([]byte(`["-", ["+", 5, 1], ["+", 1, 1]]`), &gisp.Context{
-		Sandbox: sandbox,
-	})
-
-	assert.Equal(t, float64(4), out)
-}
 
 func TestReturnFn(t *testing.T) {
 	sandbox := gisp.Sandbox{
@@ -67,35 +45,6 @@ func TestVal(t *testing.T) {
 	})
 
 	assert.Equal(t, "ok", out)
-}
-
-func TestTypes(t *testing.T) {
-	sandbox := gisp.Sandbox{
-		"$": func(g *gisp.Context) interface{} {
-			return g.AST.([]interface{})[1]
-		},
-		"echo": func(g *gisp.Context) []interface{} {
-			return []interface{}{
-				g.ArgNum(1),
-				g.ArgBool(2),
-				g.ArgArr(3),
-				g.ArgObj(4),
-				g.ArgStr(5),
-			}
-		},
-	}
-
-	out, _ := gisp.RunJSON([]byte(`["echo", 1.2, true, ["$", []], {}, "ok"]`), &gisp.Context{
-		Sandbox: sandbox,
-	})
-
-	assert.Equal(t, []interface{}{
-		1.2,
-		true,
-		[]interface{}{},
-		map[string]interface{}{},
-		"ok",
-	}, out)
 }
 
 func TestAST(t *testing.T) {
@@ -166,87 +115,4 @@ func TestRuntimeErr(t *testing.T) {
 			},
 		},
 	})
-}
-
-func Add(L *lua.LState) int {
-	a := L.ToInt(1)            /* get argument */
-	b := L.ToInt(2)            /* get argument */
-	L.Push(lua.LNumber(a + b)) /* push result */
-	return 1                   /* number of results */
-}
-
-func BenchmarkLua(b *testing.B) {
-	L := lua.NewState()
-	defer L.Close()
-	L.SetGlobal("add", L.NewFunction(Add))
-
-	b.ResetTimer()
-
-	for n := 0; n < b.N; n++ {
-		L.DoString("add(1.1,1.2)")
-	}
-}
-
-func BenchmarkAST(b *testing.B) {
-	code := []byte(`["+", 1.1, 1.2]`)
-	var ast interface{}
-	json.Unmarshal(code, &ast)
-
-	sandbox := gisp.Sandbox{
-		"+": func(ctx *gisp.Context) interface{} {
-			return ctx.ArgNum(1) + ctx.ArgNum(2)
-		},
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		gisp.Run(&gisp.Context{
-			AST:     ast,
-			Sandbox: sandbox,
-		})
-	}
-}
-
-func BenchmarkAST_liftPanic(b *testing.B) {
-	code := []byte(`["+", 1, 1]`)
-	var ast interface{}
-	json.Unmarshal(code, &ast)
-
-	sandbox := gisp.Sandbox{
-		"+": func(ctx *gisp.Context) interface{} {
-			return ctx.ArgNum(1) + ctx.ArgNum(2)
-		},
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		gisp.Run(&gisp.Context{
-			AST:         ast,
-			Sandbox:     sandbox,
-			IsLiftPanic: true,
-		})
-	}
-}
-
-func BenchmarkJSON(b *testing.B) {
-	sandbox := gisp.Sandbox{
-		"+": func(ctx *gisp.Context) interface{} {
-			return ctx.ArgNum(1) + ctx.ArgNum(2)
-		},
-	}
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		gisp.RunJSON([]byte(`["+", ["+", 1, 1], ["+", 1, 1]]`), &gisp.Context{
-			Sandbox: sandbox,
-		})
-	}
-}
-
-func BenchmarkJSONBase(b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		code := []byte(`["+", ["+", 1, 1], ["+", 1, 1]]`)
-		var ast interface{}
-		json.Unmarshal(code, &ast)
-	}
 }
