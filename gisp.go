@@ -7,11 +7,12 @@ type Sandbox map[string]func(*Context) interface{}
 
 // Context context
 type Context struct {
-	AST     interface{}
-	Sandbox Sandbox
-	ENV     interface{}
-	Index   int
-	Parent  *Context
+	AST         interface{}
+	Sandbox     Sandbox
+	ENV         interface{}
+	Index       int
+	Parent      *Context
+	IsLiftPanic bool
 }
 
 // Error ...
@@ -48,11 +49,15 @@ func Run(ctx *Context) interface{} {
 			if fn == nil {
 				ctx.Error("function \"" + name + "\" is undefined")
 			}
-			defer ctx.liftPanic()
+			if ctx.IsLiftPanic {
+				defer ctx.liftPanic()
+			}
 			return fn(ctx)
 		}
 
-		defer ctx.liftPanic()
+		if ctx.IsLiftPanic {
+			defer ctx.liftPanic()
+		}
 		return action.(func(*Context) interface{})(ctx)
 	}
 
@@ -80,13 +85,8 @@ func (ctx *Context) Error(msg string) {
 func RunJSON(code []byte, ctx *Context) (ret interface{}, err error) {
 	var ast interface{}
 	err = json.Unmarshal(code, &ast)
-
-	ret = Run(&Context{
-		AST:     ast,
-		Sandbox: ctx.Sandbox,
-		ENV:     ctx.ENV,
-	})
-
+	ctx.AST = ast
+	ret = Run(ctx)
 	return
 }
 
@@ -99,11 +99,12 @@ func (ctx *Context) Arg(index int) interface{} {
 	}
 
 	return Run(&Context{
-		AST:     ast[index],
-		Sandbox: ctx.Sandbox,
-		ENV:     ctx.ENV,
-		Index:   index,
-		Parent:  ctx,
+		AST:         ast[index],
+		Sandbox:     ctx.Sandbox,
+		ENV:         ctx.ENV,
+		Index:       index,
+		Parent:      ctx,
+		IsLiftPanic: ctx.IsLiftPanic,
 	})
 }
 
