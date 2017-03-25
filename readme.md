@@ -23,3 +23,12 @@ func main() {
 	fmt.Println(out) // 3
 }
 ```
+
+## Benchmark
+
+Compare to normal gopher-lua", gisp is about 90 times faster.
+
+```
+BenchmarkLua-8                	  100000	     22802 ns/op
+BenchmarkAST-8                	 5000000	       248 ns/op
+```

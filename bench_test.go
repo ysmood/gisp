@@ -8,6 +8,31 @@ import (
 	lua "github.com/yuin/gopher-lua"
 )
 
+func noop(v interface{}) {}
+
+func BenchmarkTypeAssertion(b *testing.B) {
+	var s interface{} = "test"
+
+	for n := 0; n < b.N; n++ {
+		switch s.(type) {
+		case string:
+			noop(s.(string))
+		case int32:
+			noop(s.(int32))
+		case int64:
+			noop(s.(int64))
+		}
+	}
+}
+
+func BenchmarkTypeNonAssertion(b *testing.B) {
+	var s string = "test"
+
+	for n := 0; n < b.N; n++ {
+		noop(s)
+	}
+}
+
 func Add(L *lua.LState) int {
 	a := L.ToInt(1)            /* get argument */
 	b := L.ToInt(2)            /* get argument */
@@ -27,13 +52,13 @@ func BenchmarkLua(b *testing.B) {
 	}
 }
 
-func BenchmarkAST(b *testing.B) {
+func BenchmarkGisp(b *testing.B) {
 	code := []byte(`["+", 1.1, 1.2]`)
 	var ast interface{}
 	json.Unmarshal(code, &ast)
 
 	sandbox := gisp.Sandbox{
-		"+": func(ctx *gisp.Context) interface{} {
+		"+": func(ctx *gisp.Context) float64 {
 			return ctx.ArgNum(1) + ctx.ArgNum(2)
 		},
 	}
@@ -47,13 +72,13 @@ func BenchmarkAST(b *testing.B) {
 	}
 }
 
-func BenchmarkAST_liftPanic(b *testing.B) {
+func BenchmarkLiftPanic(b *testing.B) {
 	code := []byte(`["+", 1, 1]`)
 	var ast interface{}
 	json.Unmarshal(code, &ast)
 
 	sandbox := gisp.Sandbox{
-		"+": func(ctx *gisp.Context) interface{} {
+		"+": func(ctx *gisp.Context) float64 {
 			return ctx.ArgNum(1) + ctx.ArgNum(2)
 		},
 	}
@@ -70,7 +95,7 @@ func BenchmarkAST_liftPanic(b *testing.B) {
 
 func BenchmarkJSON(b *testing.B) {
 	sandbox := gisp.Sandbox{
-		"+": func(ctx *gisp.Context) interface{} {
+		"+": func(ctx *gisp.Context) float64 {
 			return ctx.ArgNum(1) + ctx.ArgNum(2)
 		},
 	}
