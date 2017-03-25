@@ -13,13 +13,13 @@ import (
 func TestJSON(t *testing.T) {
 	sandbox := gisp.Sandbox{
 		"+": func(ctx *gisp.Context) interface{} {
-			a := ctx.Arg(1).(float64)
-			b := ctx.Arg(2).(float64)
+			a := ctx.ArgNum(1)
+			b := ctx.ArgNum(2)
 			return a + b
 		},
 		"-": func(ctx *gisp.Context) interface{} {
-			a := ctx.Arg(1).(float64)
-			b := ctx.Arg(2).(float64)
+			a := ctx.ArgNum(1)
+			b := ctx.ArgNum(2)
 			return a - b
 		},
 	}
@@ -64,8 +64,8 @@ func TestAST(t *testing.T) {
 
 	sandbox := gisp.Sandbox{
 		"*": func(ctx *gisp.Context) interface{} {
-			a := ctx.Arg(1).(float64)
-			b := ctx.Arg(2).(float64)
+			a := ctx.ArgNum(1)
+			b := ctx.ArgNum(2)
 			return a * b
 		},
 	}
@@ -148,20 +148,18 @@ func BenchmarkLua(b *testing.B) {
 	b.ResetTimer()
 
 	for n := 0; n < b.N; n++ {
-		L.DoString("add(1,1)")
+		L.DoString("add(1.1,1.2)")
 	}
 }
 
 func BenchmarkAST(b *testing.B) {
-	code := []byte(`["+", 1, 1]`)
+	code := []byte(`["+", 1.1, 1.2]`)
 	var ast interface{}
 	json.Unmarshal(code, &ast)
 
 	sandbox := gisp.Sandbox{
 		"+": func(ctx *gisp.Context) interface{} {
-			a := ctx.Arg(1).(float64)
-			b := ctx.Arg(2).(float64)
-			return a + b
+			return ctx.ArgNum(1) + ctx.ArgNum(2)
 		},
 	}
 
@@ -181,9 +179,7 @@ func BenchmarkAST_liftPanic(b *testing.B) {
 
 	sandbox := gisp.Sandbox{
 		"+": func(ctx *gisp.Context) interface{} {
-			a := ctx.Arg(1).(float64)
-			b := ctx.Arg(2).(float64)
-			return a + b
+			return ctx.ArgNum(1) + ctx.ArgNum(2)
 		},
 	}
 
@@ -200,9 +196,7 @@ func BenchmarkAST_liftPanic(b *testing.B) {
 func BenchmarkJSON(b *testing.B) {
 	sandbox := gisp.Sandbox{
 		"+": func(ctx *gisp.Context) interface{} {
-			a := ctx.Arg(1).(float64)
-			b := ctx.Arg(2).(float64)
-			return a + b
+			return ctx.ArgNum(1) + ctx.ArgNum(2)
 		},
 	}
 

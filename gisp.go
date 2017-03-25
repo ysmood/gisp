@@ -1,17 +1,27 @@
 package gisp
 
-import "encoding/json"
-
 // Sandbox sandbox
 type Sandbox map[string]func(*Context) interface{}
 
 // Context context
 type Context struct {
-	AST         interface{}
-	Sandbox     Sandbox
-	ENV         interface{}
-	Index       int
-	Parent      *Context
+	// AST is simply a json data
+	AST interface{}
+
+	// The functions exposed to the vm
+	Sandbox Sandbox
+
+	// The state exposed to the functions in the vm
+	// It's not directly visible to user.
+	ENV interface{}
+
+	// The index of parent context
+	Index int
+
+	// Parent AST
+	Parent *Context
+
+	// Whether auto lift sandbox panic with informal stack info or not
 	IsLiftPanic bool
 }
 
@@ -79,36 +89,4 @@ func (ctx *Context) Error(msg string) {
 		Message: msg,
 		Stack:   stack,
 	})
-}
-
-// RunJSON json entrance
-func RunJSON(code []byte, ctx *Context) (ret interface{}, err error) {
-	var ast interface{}
-	err = json.Unmarshal(code, &ast)
-	ctx.AST = ast
-	ret = Run(ctx)
-	return
-}
-
-// Arg sugar
-func (ctx *Context) Arg(index int) interface{} {
-	ast := ctx.AST.([]interface{})
-
-	if index >= len(ast) {
-		return nil
-	}
-
-	return Run(&Context{
-		AST:         ast[index],
-		Sandbox:     ctx.Sandbox,
-		ENV:         ctx.ENV,
-		Index:       index,
-		Parent:      ctx,
-		IsLiftPanic: ctx.IsLiftPanic,
-	})
-}
-
-// Len Arg sugar
-func (ctx *Context) Len() int {
-	return len(ctx.AST.([]interface{}))
 }
