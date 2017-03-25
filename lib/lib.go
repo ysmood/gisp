@@ -3,8 +3,6 @@ package lib
 import (
 	"fmt"
 	"math"
-	"strconv"
-	"strings"
 
 	"github.com/ysmood/gisp"
 )
@@ -20,30 +18,23 @@ func Get(ctx *gisp.Context) interface{} {
 	pathRaw := ctx.Arg(2)
 	defaultVal := ctx.Arg(3)
 
-	var paths []interface{}
-	switch pathRaw.(type) {
-	case string:
-		strArr := strings.Split(pathRaw.(string), ".")
-		paths = make([]interface{}, len(strArr))
-		for i, p := range strArr {
-			f, err := strconv.ParseUint(p, 10, 32)
-			if err == nil {
-				paths[i] = uint(f)
-			} else {
-				paths[i] = p
-			}
-		}
-	case []interface{}:
-		paths = pathRaw.([]interface{})
-	}
+	paths := toJSONPath(pathRaw)
 
 	for i, l := 0, len(paths); i < l; i++ {
 		p := paths[i]
 		switch p.(type) {
 		case string:
-			obj = obj.(map[string]interface{})[p.(string)]
-		case uint:
-			obj = obj.([]interface{})[p.(uint)]
+			var has bool
+			obj, has = obj.(map[string]interface{})[p.(string)]
+
+			if !has {
+				return defaultVal
+			}
+		case uint64:
+			if int(p.(uint64)) >= len(obj.([]interface{})) {
+				return defaultVal
+			}
+			obj = obj.([]interface{})[p.(uint64)]
 		default:
 			return defaultVal
 		}
@@ -53,26 +44,11 @@ func Get(ctx *gisp.Context) interface{} {
 
 // Set ...
 func Set(ctx *gisp.Context) interface{} {
-	obj := clone(ctx.Arg(1))
+	obj := ctx.Arg(1)
 	pathRaw := ctx.Arg(2)
 	val := ctx.Arg(3)
 
-	var paths []interface{}
-	switch pathRaw.(type) {
-	case string:
-		strArr := strings.Split(pathRaw.(string), ".")
-		paths = make([]interface{}, len(strArr))
-		for i, p := range strArr {
-			f, err := strconv.ParseUint(p, 10, 32)
-			if err == nil {
-				paths[i] = float64(f)
-			} else {
-				paths[i] = p
-			}
-		}
-	case float64:
-		paths = pathRaw.([]interface{})
-	}
+	paths := toJSONPath(pathRaw)
 
 	var p interface{}
 	pathLen := len(paths)
@@ -93,8 +69,8 @@ func Set(ctx *gisp.Context) interface{} {
 				case map[string]interface{}:
 				case []interface{}:
 				default:
-					if isFloat64(paths[i+1]) {
-						next = make([]interface{}, int(paths[i+1].(float64)+1))
+					if isUint64(paths[i+1]) {
+						next = make([]interface{}, int(paths[i+1].(uint64)+1))
 					} else {
 						next = map[string]interface{}{}
 					}
@@ -104,8 +80,8 @@ func Set(ctx *gisp.Context) interface{} {
 				cur = next
 			}
 
-		case float64:
-			index := int(p.(float64))
+		case uint64:
+			index := p.(uint64)
 			if i == last {
 				cur.([]interface{})[index] = val
 			} else {
@@ -115,8 +91,8 @@ func Set(ctx *gisp.Context) interface{} {
 				case map[string]interface{}:
 				case []interface{}:
 				default:
-					if isFloat64(paths[i+1]) {
-						next = make([]interface{}, int(paths[i+1].(float64)+1))
+					if isUint64(paths[i+1]) {
+						next = make([]interface{}, paths[i+1].(uint64)+1)
 					} else {
 						next = map[string]interface{}{}
 					}
@@ -297,8 +273,8 @@ func Lt(ctx *gisp.Context) interface{} {
 	}
 }
 
-// Lte ...
-func Lte(ctx *gisp.Context) interface{} {
+// Le ...
+func Le(ctx *gisp.Context) interface{} {
 	a := ctx.Arg(1)
 	b := ctx.Arg(2)
 	switch a.(type) {

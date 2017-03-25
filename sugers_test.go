@@ -21,7 +21,7 @@ func TestJSON(t *testing.T) {
 		},
 	}
 
-	out, _ := gisp.RunJSON([]byte(`["-", ["+", 5, 1], ["+", 1, 1]]`), &gisp.Context{
+	out, _ := gisp.RunJSON(`["-", ["+", 5, 1], ["+", 1, 1]]`, &gisp.Context{
 		Sandbox: sandbox,
 	})
 
@@ -44,7 +44,7 @@ func TestTypes(t *testing.T) {
 		},
 	}
 
-	out, _ := gisp.RunJSON([]byte(`["echo", 1.2, true, ["$", []], {}, "ok"]`), &gisp.Context{
+	out, _ := gisp.RunJSON(`["echo", 1.2, true, ["$", []], {}, "ok"]`, &gisp.Context{
 		Sandbox: sandbox,
 	})
 

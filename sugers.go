@@ -3,7 +3,12 @@ package gisp
 import "github.com/a8m/djson"
 
 // RunJSON json entrance
-func RunJSON(code []byte, ctx *Context) (ret interface{}, err error) {
+func RunJSON(code string, ctx *Context) (interface{}, error) {
+	return RunJSONRaw([]byte(code), ctx)
+}
+
+// RunJSON json entrance
+func RunJSONRaw(code []byte, ctx *Context) (ret interface{}, err error) {
 	ast, err := djson.Decode(code)
 	ctx.AST = ast
 	ret = Run(ctx)

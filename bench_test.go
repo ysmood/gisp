@@ -101,7 +101,7 @@ func BenchmarkJSON(b *testing.B) {
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		gisp.RunJSON([]byte(`["+", ["+", 1, 1], ["+", 1, 1]]`), &gisp.Context{
+		gisp.RunJSON(`["+", ["+", 1, 1], ["+", 1, 1]]`, &gisp.Context{
 			Sandbox: sandbox,
 		})
 	}

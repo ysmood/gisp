@@ -18,7 +18,7 @@ func TestReturnFn(t *testing.T) {
 		},
 	}
 
-	out, _ := gisp.RunJSON([]byte(`[["foo"], 1, 2]`), &gisp.Context{
+	out, _ := gisp.RunJSON(`[["foo"], 1, 2]`, &gisp.Context{
 		Sandbox: sandbox,
 	})
 
@@ -28,7 +28,7 @@ func TestReturnFn(t *testing.T) {
 func TestStr(t *testing.T) {
 	sandbox := gisp.Sandbox{}
 
-	out, _ := gisp.RunJSON([]byte(`"foo"`), &gisp.Context{
+	out, _ := gisp.RunJSON(`"foo"`, &gisp.Context{
 		Sandbox: sandbox,
 	})
 
@@ -40,7 +40,7 @@ func TestVal(t *testing.T) {
 		"test": "ok",
 	}
 
-	out, _ := gisp.RunJSON([]byte(`["test"]`), &gisp.Context{
+	out, _ := gisp.RunJSON(`["test"]`, &gisp.Context{
 		Sandbox: sandbox,
 	})
 
@@ -80,7 +80,7 @@ func TestMissName(t *testing.T) {
 		}
 	}()
 
-	gisp.RunJSON([]byte(`["foo"]`), &gisp.Context{
+	gisp.RunJSON(`["foo"]`, &gisp.Context{
 		IsLiftPanic: true,
 		Sandbox:     gisp.Sandbox{},
 	})
@@ -99,7 +99,7 @@ func TestRuntimeErr(t *testing.T) {
 		}
 	}()
 
-	gisp.RunJSON([]byte(`["@", ["@", 1, 1], ["@", ["foo"], 1]]`), &gisp.Context{
+	gisp.RunJSON(`["@", ["@", 1, 1], ["@", ["foo"], 1]]`, &gisp.Context{
 		IsLiftPanic: true,
 		Sandbox: gisp.Sandbox{
 			"foo": func(ctx *gisp.Context) interface{} {

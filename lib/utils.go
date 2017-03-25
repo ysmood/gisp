@@ -3,6 +3,7 @@ package lib
 import (
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 func f2s(v interface{}) string {
@@ -14,13 +15,8 @@ func s2f(v interface{}) (f float64) {
 	return
 }
 
-func isStr(v interface{}) (is bool) {
-	_, is = v.(string)
-	return
-}
-
-func isFloat64(v interface{}) (is bool) {
-	_, is = v.(float64)
+func isUint64(v interface{}) (is bool) {
+	_, is = v.(uint64)
 	return
 }
 
@@ -55,4 +51,24 @@ func clone(obj interface{}) interface{} {
 	default:
 		return obj
 	}
+}
+
+func toJSONPath(pathRaw interface{}) (paths []interface{}) {
+	switch pathRaw.(type) {
+	case string:
+		strArr := strings.Split(pathRaw.(string), ".")
+		paths = make([]interface{}, len(strArr))
+		for i, p := range strArr {
+			f, err := strconv.ParseUint(p, 10, 32)
+			if err == nil {
+				paths[i] = f
+			} else {
+				paths[i] = p
+			}
+		}
+	case []interface{}:
+		paths = pathRaw.([]interface{})
+	}
+
+	return
 }
