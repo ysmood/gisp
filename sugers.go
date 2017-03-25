@@ -1,11 +1,10 @@
 package gisp
 
-import "encoding/json"
+import "github.com/a8m/djson"
 
 // RunJSON json entrance
 func RunJSON(code []byte, ctx *Context) (ret interface{}, err error) {
-	var ast interface{}
-	err = json.Unmarshal(code, &ast)
+	ast, err := djson.Decode(code)
 	ctx.AST = ast
 	ret = Run(ctx)
 	return

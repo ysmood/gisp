@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/a8m/djson"
 	"github.com/ysmood/gisp"
 	lua "github.com/yuin/gopher-lua"
 )
@@ -54,8 +55,7 @@ func BenchmarkLua(b *testing.B) {
 
 func BenchmarkGisp(b *testing.B) {
 	code := []byte(`["+", 1.1, 1.2]`)
-	var ast interface{}
-	json.Unmarshal(code, &ast)
+	ast, _ := djson.Decode(code)
 
 	sandbox := gisp.Sandbox{
 		"+": func(ctx *gisp.Context) float64 {
@@ -74,8 +74,7 @@ func BenchmarkGisp(b *testing.B) {
 
 func BenchmarkLiftPanic(b *testing.B) {
 	code := []byte(`["+", 1, 1]`)
-	var ast interface{}
-	json.Unmarshal(code, &ast)
+	ast, _ := djson.Decode(code)
 
 	sandbox := gisp.Sandbox{
 		"+": func(ctx *gisp.Context) float64 {
@@ -105,6 +104,13 @@ func BenchmarkJSON(b *testing.B) {
 		gisp.RunJSON([]byte(`["+", ["+", 1, 1], ["+", 1, 1]]`), &gisp.Context{
 			Sandbox: sandbox,
 		})
+	}
+}
+
+func BenchmarkDJSONBase(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		code := []byte(`["+", ["+", 1, 1], ["+", 1, 1]]`)
+		djson.Decode(code)
 	}
 }
 

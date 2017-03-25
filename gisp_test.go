@@ -1,10 +1,10 @@
 package gisp_test
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 
+	"github.com/a8m/djson"
 	"github.com/stretchr/testify/assert"
 	"github.com/ysmood/gisp"
 )
@@ -49,8 +49,7 @@ func TestVal(t *testing.T) {
 
 func TestAST(t *testing.T) {
 	code := []byte(`["*", ["*", 2, 5], ["*", 9, 3]]`)
-	var ast interface{}
-	json.Unmarshal(code, &ast)
+	ast, _ := djson.Decode(code)
 
 	sandbox := gisp.Sandbox{
 		"*": func(ctx *gisp.Context) interface{} {
