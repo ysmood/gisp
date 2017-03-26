@@ -27,6 +27,24 @@ func TestGetPath(t *testing.T) {
 	assert.Equal(t, float64(2), out)
 }
 
+func TestGetDefault(t *testing.T) {
+	out, _ := gisp.RunJSON(`["get", {}, 1]`, &gisp.Context{
+		Sandbox: map[string]interface{}{
+			"get": lib.Get,
+		},
+	})
+	assert.Equal(t, nil, out)
+}
+
+func TestGetArrDefault(t *testing.T) {
+	out, _ := gisp.RunJSON(`["get", [], "10"]`, &gisp.Context{
+		Sandbox: map[string]interface{}{
+			"get": lib.Get,
+		},
+	})
+	assert.Equal(t, nil, out)
+}
+
 func TestGetDefaultValFromObj(t *testing.T) {
 	out, _ := gisp.RunJSON(`["get", { "a": 1.1 }, "b", false]`, &gisp.Context{
 		Sandbox: map[string]interface{}{

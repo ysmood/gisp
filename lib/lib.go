@@ -25,21 +25,33 @@ func Get(ctx *gisp.Context) interface{} {
 		switch p.(type) {
 		case string:
 			var has bool
-			obj, has = obj.(map[string]interface{})[p.(string)]
+			dict, ok := obj.(map[string]interface{})
+
+			if !ok {
+				return defaultVal
+			}
+
+			obj, has = dict[p.(string)]
 
 			if !has {
 				return defaultVal
 			}
 		case uint64:
-			if int(p.(uint64)) >= len(obj.([]interface{})) {
+			arr, ok := obj.([]interface{})
+
+			if !ok {
 				return defaultVal
 			}
-			obj = obj.([]interface{})[p.(uint64)]
+
+			if int(p.(uint64)) >= len(arr) {
+				return defaultVal
+			}
+			obj = arr[p.(uint64)]
 		default:
 			return defaultVal
 		}
 	}
-	return obj
+	return defaultVal
 }
 
 // Set ...

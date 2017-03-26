@@ -70,5 +70,5 @@ func toJSONPath(pathRaw interface{}) (paths []interface{}) {
 		paths = pathRaw.([]interface{})
 	}
 
-	return
+	return []interface{}{}
 }
