@@ -20,7 +20,13 @@ func Get(ctx *gisp.Context) interface{} {
 
 	paths := toJSONPath(pathRaw)
 
-	for i, l := 0, len(paths); i < l; i++ {
+	l := len(paths)
+
+	if l == 0 {
+		return defaultVal
+	}
+
+	for i := 0; i < l; i++ {
 		p := paths[i]
 		switch p.(type) {
 		case string:
@@ -51,7 +57,7 @@ func Get(ctx *gisp.Context) interface{} {
 			return defaultVal
 		}
 	}
-	return defaultVal
+	return obj
 }
 
 // Set ...
