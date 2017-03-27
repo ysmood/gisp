@@ -100,10 +100,18 @@ func Set(ctx *gisp.Context) interface{} {
 
 		case uint64:
 			index := p.(uint64)
+			arr := cur.([]interface{})
 			if i == last {
-				cur.([]interface{})[index] = val
+				arr[index] = val
 			} else {
-				next := cur.([]interface{})[index]
+				l := uint64(len(arr))
+				if index >= l {
+					arr = append(arr, make([]interface{}, index-l+1)...)
+					if i == 0 {
+						obj = arr
+					}
+				}
+				next := arr[index]
 
 				switch next.(type) {
 				case map[string]interface{}:
@@ -115,7 +123,7 @@ func Set(ctx *gisp.Context) interface{} {
 						next = map[string]interface{}{}
 					}
 
-					cur.([]interface{})[index] = next
+					arr[index] = next
 				}
 				cur = next
 			}

@@ -1,6 +1,7 @@
 package lib_test
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/a8m/djson"
@@ -33,6 +34,7 @@ func TestGetDefault(t *testing.T) {
 			"get": lib.Get,
 		},
 	})
+	fmt.Println(out)
 	assert.Equal(t, nil, out)
 }
 
@@ -81,22 +83,22 @@ func TestSet(t *testing.T) {
 
 func TestSetArr(t *testing.T) {
 	out, _ := gisp.RunJSON(`
-		["set", [":"], "a.1.2", "ok"]
+		["set", ["|"], "1.2", "ok"]
 	`, &gisp.Context{
 		Sandbox: map[string]interface{}{
-			":":   lib.Dict,
+			"|":   lib.Arr,
 			"set": lib.Set,
 		},
 	})
 	exp, _ := djson.Decode([]byte(`
-		{"a": [null, [null, null, "ok"]]}
+		[null, [null, null, "ok"]]
 	`))
 	assert.Equal(t, exp, out)
 }
 
 func TestSetObj(t *testing.T) {
 	out, _ := gisp.RunJSON(`
-		["set", [":", "a", 10], "a", "ok"]
+		["set", [":", "a", 10], "a.2", "ok"]
 	`, &gisp.Context{
 		Sandbox: map[string]interface{}{
 			":":   lib.Dict,
@@ -104,7 +106,7 @@ func TestSetObj(t *testing.T) {
 		},
 	})
 	exp, _ := djson.Decode([]byte(`
-		{"a": "ok"}
+		{"a": [null, null, "ok"]}
 	`))
 	assert.Equal(t, exp, out)
 }
