@@ -64,7 +64,11 @@ func Get(ctx *gisp.Context) interface{} {
 func Set(ctx *gisp.Context) interface{} {
 	obj := ctx.Arg(1)
 	pathRaw := ctx.Arg(2)
-	val := ctx.Arg(3)
+
+	// TODO: optimize circular detection
+	// What a shame, go marshal doesn't support circular detection.
+	// Here we use headless clone to break the links.
+	val := clone(ctx.Arg(3))
 
 	paths := toJSONPath(pathRaw)
 
