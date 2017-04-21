@@ -1,5 +1,9 @@
 package gisp
 
+import (
+	"encoding/json"
+)
+
 // Sandbox sandbox
 type Sandbox map[string]interface{}
 
@@ -54,19 +58,13 @@ func Run(ctx *Context) interface{} {
 			defer ctx.liftPanic()
 		}
 
-		val := ctx.Arg(0)
-
-		switch val.(type) {
-		case string:
-			var has bool
-			name := val.(string)
-			val, has = ctx.Sandbox[name]
-
-			if !has {
-				ctx.Error("\"" + name + "\" is undefined")
-			}
+		if ctx.Len() == 0 {
+			return nil
 		}
 
+		val := ctx.Arg(0)
+
+		// if val is function
 		switch val.(type) {
 		case func(*Context) float64:
 			return val.(func(*Context) float64)(ctx)
@@ -80,9 +78,38 @@ func Run(ctx *Context) interface{} {
 			return val.(func(*Context) []interface{})(ctx)
 		case func(*Context) interface{}:
 			return val.(func(*Context) interface{})(ctx)
-		}
 
-		return val
+		// if val is string
+		default:
+			name, isStr := val.(string)
+			var has bool
+
+			if isStr {
+				val, has = ctx.Sandbox[name]
+			}
+
+			if has {
+				switch val.(type) {
+				case func(*Context) float64:
+					return val.(func(*Context) float64)(ctx)
+				case func(*Context) string:
+					return val.(func(*Context) string)(ctx)
+				case func(*Context) bool:
+					return val.(func(*Context) bool)(ctx)
+				case func(*Context) map[string]interface{}:
+					return val.(func(*Context) map[string]interface{})(ctx)
+				case func(*Context) []interface{}:
+					return val.(func(*Context) []interface{})(ctx)
+				case func(*Context) interface{}:
+					return val.(func(*Context) interface{})(ctx)
+				default:
+					return val
+				}
+			}
+
+			msg, _ := json.Marshal(ctx.AST.([]interface{})[0])
+			ctx.Error("function " + string(msg) + " is undefined")
+		}
 	}
 
 	return ctx.AST
