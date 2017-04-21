@@ -367,3 +367,78 @@ func Or(ctx *gisp.Context) interface{} {
 	}
 	return ctx.Arg(2).(bool)
 }
+
+// Switch ...
+func Switch(ctx *gisp.Context) interface{} {
+
+	if ctx.Len() == 1 {
+		return nil
+	}
+
+	ast := ctx.AST.([]interface{})
+	start := 1
+	end := ctx.Len() - 1
+
+	firstAst, firstOk := ast[start].([]interface{})
+	var expr interface{}
+	hasExpr := false
+
+	if !firstOk {
+		expr = ctx.Arg(start)
+		hasExpr = true
+		start++
+	} else if len(firstAst) == 1 {
+		if name, ok := firstAst[0].(string); !ok || name != "case" {
+			expr = ctx.Arg(start)
+			hasExpr = true
+			start++
+		}
+	}
+
+	lastAst, lastOk := ast[end].([]interface{})
+	var defaultAst interface{}
+
+	if lastOk && len(lastAst) == 2 {
+		if name, ok := lastAst[0].(string); ok && name == "default" {
+			defaultAst = lastAst[1]
+			end--
+		}
+	}
+
+	for i := start; i <= end; i++ {
+		node, nodeOk := ast[i].([]interface{})
+		if !nodeOk || len(node) != 3 {
+			ctx.Error("switch unexpected identifier")
+			return nil
+		}
+		name, nameOk := node[0].(string)
+		if !nameOk || name != "case" {
+			ctx.Error("switch unexpected identifier")
+			return nil
+		}
+		itemValue := gisp.Run(&gisp.Context{
+			AST:     node[1],
+			Sandbox: ctx.Sandbox,
+		})
+		if hasExpr {
+			if itemValue == expr {
+				return gisp.Run(&gisp.Context{
+					AST:     node[2],
+					Sandbox: ctx.Sandbox,
+				})
+			}
+		} else {
+			if assert, ok := itemValue.(bool); ok && assert {
+				return gisp.Run(&gisp.Context{
+					AST:     node[2],
+					Sandbox: ctx.Sandbox,
+				})
+			}
+		}
+	}
+
+	return gisp.Run(&gisp.Context{
+		AST:     defaultAst,
+		Sandbox: ctx.Sandbox,
+	})
+}

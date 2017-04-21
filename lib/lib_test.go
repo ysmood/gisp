@@ -126,3 +126,69 @@ func TestSetCircular(t *testing.T) {
 	`))
 	assert.Equal(t, exp, out)
 }
+
+func TestSwitchHasExpr(t *testing.T) {
+	out, _ := gisp.RunJSON(`["do",
+		["def", "id", 2],
+		["switch",
+			["id"],
+			["case", 1, 1],
+			["case", 2, 2],
+			["default", 3]
+		]
+	]`, &gisp.Context{
+		Sandbox: map[string]interface{}{
+			"switch": lib.Switch,
+			"do":     lib.Do,
+			"def":    lib.Def,
+		},
+	})
+	exp, _ := djson.Decode([]byte(`
+		2
+	`))
+	assert.Equal(t, exp, out)
+}
+
+func TestSwitchNoExpr(t *testing.T) {
+	out, _ := gisp.RunJSON(`["do",
+		["def", "id", false],
+		["def", "id2", true],
+		["switch",
+			["case", ["id"], 1],
+			["case", ["id2"], 2],
+			["default", 3]
+		]
+	]`, &gisp.Context{
+		Sandbox: map[string]interface{}{
+			"switch": lib.Switch,
+			"do":     lib.Do,
+			"def":    lib.Def,
+		},
+	})
+	exp, _ := djson.Decode([]byte(`
+		2
+	`))
+	assert.Equal(t, exp, out)
+}
+
+func TestSwitchDefault(t *testing.T) {
+	out, _ := gisp.RunJSON(`["do",
+		["def", "id", 1000],
+		["switch",
+			["id"],
+			["case", 1, 1],
+			["case", 2, 2],
+			["default", 3]
+		]
+	]`, &gisp.Context{
+		Sandbox: map[string]interface{}{
+			"switch": lib.Switch,
+			"do":     lib.Do,
+			"def":    lib.Def,
+		},
+	})
+	exp, _ := djson.Decode([]byte(`
+		3
+	`))
+	assert.Equal(t, exp, out)
+}
