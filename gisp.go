@@ -1,5 +1,9 @@
 package gisp
 
+import (
+	"encoding/json"
+)
+
 // Sandbox sandbox
 type Sandbox map[string]interface{}
 
@@ -54,6 +58,10 @@ func Run(ctx *Context) interface{} {
 			defer ctx.liftPanic()
 		}
 
+		if ctx.Len() == 0 {
+			return nil
+		}
+
 		val := ctx.Arg(0)
 
 		switch val.(type) {
@@ -65,6 +73,10 @@ func Run(ctx *Context) interface{} {
 			if !has {
 				ctx.Error("\"" + name + "\" is undefined")
 			}
+		default:
+			msg, _ := json.Marshal(ctx.AST.([]interface{})[0])
+			ctx.Error(string(msg) + " should return function")
+
 		}
 
 		switch val.(type) {

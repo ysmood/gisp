@@ -25,6 +25,14 @@ func TestReturnFn(t *testing.T) {
 	assert.Equal(t, float64(3), out)
 }
 
+// func TestEmpty(t *testing.T) {
+// 	out, _ := gisp.RunJSON(`[]`, &gisp.Context{
+// 		IsLiftPanic: true,
+// 		Sandbox:     gisp.Sandbox{},
+// 	})
+// 	assert.Equal(t, nil, out)
+// }
+
 func TestStr(t *testing.T) {
 	sandbox := gisp.Sandbox{}
 
@@ -110,6 +118,29 @@ func TestRuntimeErr(t *testing.T) {
 			"@": func(ctx *gisp.Context) interface{} {
 				ctx.Arg(1)
 				ctx.Arg(2)
+				return nil
+			},
+		},
+	})
+}
+
+func TestEmptyFn(t *testing.T) {
+	defer func() {
+		if r := recover(); r == nil {
+			t.Error("should panic")
+		} else {
+			assert.Equal(
+				t,
+				"[\"foo\"] should return function",
+				fmt.Sprint(r.(gisp.Error).Message),
+			)
+		}
+	}()
+
+	gisp.RunJSON(`[["foo"]]`, &gisp.Context{
+		IsLiftPanic: true,
+		Sandbox: gisp.Sandbox{
+			"foo": func(ctx *gisp.Context) interface{} {
 				return nil
 			},
 		},
