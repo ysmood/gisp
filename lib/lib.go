@@ -417,28 +417,44 @@ func Switch(ctx *gisp.Context) interface{} {
 			return nil
 		}
 		itemValue := gisp.Run(&gisp.Context{
-			AST:     node[1],
-			Sandbox: ctx.Sandbox,
+			AST:         node[1],
+			Sandbox:     ctx.Sandbox,
+			ENV:         ctx.ENV,
+			Parent:      ctx.Parent,
+			Index:       ctx.Index,
+			IsLiftPanic: ctx.IsLiftPanic,
 		})
 		if hasExpr {
 			if itemValue == expr {
 				return gisp.Run(&gisp.Context{
-					AST:     node[2],
-					Sandbox: ctx.Sandbox,
+					AST:         node[2],
+					Sandbox:     ctx.Sandbox,
+					ENV:         ctx.ENV,
+					Parent:      ctx.Parent,
+					Index:       ctx.Index,
+					IsLiftPanic: ctx.IsLiftPanic,
 				})
 			}
 		} else {
 			if assert, ok := itemValue.(bool); ok && assert {
 				return gisp.Run(&gisp.Context{
-					AST:     node[2],
-					Sandbox: ctx.Sandbox,
+					AST:         node[2],
+					Sandbox:     ctx.Sandbox,
+					ENV:         ctx.ENV,
+					Parent:      ctx.Parent,
+					Index:       ctx.Index,
+					IsLiftPanic: ctx.IsLiftPanic,
 				})
 			}
 		}
 	}
 
 	return gisp.Run(&gisp.Context{
-		AST:     defaultAst,
-		Sandbox: ctx.Sandbox,
+		AST:         defaultAst,
+		Sandbox:     ctx.Sandbox,
+		ENV:         ctx.ENV,
+		Parent:      ctx.Parent,
+		Index:       ctx.Index,
+		IsLiftPanic: ctx.IsLiftPanic,
 	})
 }
