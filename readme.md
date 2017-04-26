@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/ysmood/gisp.svg)](https://travis-ci.org/ysmood/gisp) 
+
 See js implementation for more info: https://github.com/ysmood/nisp
 
 ## Example
