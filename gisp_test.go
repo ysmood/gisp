@@ -7,8 +7,23 @@ import (
 	"github.com/a8m/djson"
 	"github.com/stretchr/testify/assert"
 	"github.com/ysmood/gisp"
+	"github.com/ysmood/gisp/lib"
 )
 
+func TestReadmeExample(t *testing.T) {
+	code := `["+", 1, ["*", 2, 2]]`
+
+	out, _ := gisp.RunJSON(code, &gisp.Context{
+		Sandbox: gisp.Sandbox{
+			"+": lib.Add,
+			"*": lib.Multiply,
+		},
+	})
+
+	fmt.Println(out) // 5
+
+	assert.Equal(t, float64(5), out)
+}
 func TestReturnFn(t *testing.T) {
 	sandbox := gisp.Sandbox{
 		"foo": func(ctx *gisp.Context) interface{} {
