@@ -57,11 +57,11 @@ func BenchmarkGisp(b *testing.B) {
 	code := []byte(`["+", 1.1, 1.2]`)
 	ast, _ := djson.Decode(code)
 
-	sandbox := gisp.Sandbox{
+	sandbox := gisp.New(gisp.Box{
 		"+": func(ctx *gisp.Context) float64 {
 			return ctx.ArgNum(1) + ctx.ArgNum(2)
 		},
-	}
+	})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -76,11 +76,11 @@ func BenchmarkLiftPanic(b *testing.B) {
 	code := []byte(`["+", 1, 1]`)
 	ast, _ := djson.Decode(code)
 
-	sandbox := gisp.Sandbox{
+	sandbox := gisp.New(gisp.Box{
 		"+": func(ctx *gisp.Context) float64 {
 			return ctx.ArgNum(1) + ctx.ArgNum(2)
 		},
-	}
+	})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -93,11 +93,11 @@ func BenchmarkLiftPanic(b *testing.B) {
 }
 
 func BenchmarkJSON(b *testing.B) {
-	sandbox := gisp.Sandbox{
+	sandbox := gisp.New(gisp.Box{
 		"+": func(ctx *gisp.Context) float64 {
 			return ctx.ArgNum(1) + ctx.ArgNum(2)
 		},
-	}
+	})
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

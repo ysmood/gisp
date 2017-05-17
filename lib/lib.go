@@ -7,6 +7,9 @@ import (
 	"github.com/ysmood/gisp"
 )
 
+// MaxFnStackSize ...
+const MaxFnStackSize = 17
+
 // Raw ...
 func Raw(ctx *gisp.Context) interface{} {
 	return ctx.AST.([]interface{})[1]
@@ -193,9 +196,9 @@ func Do(ctx *gisp.Context) interface{} {
 // Def ...
 func Def(ctx *gisp.Context) interface{} {
 	val := ctx.Arg(2)
-	ctx.Sandbox[str(ctx.Arg(1))] = func(ctx *gisp.Context) interface{} {
+	ctx.Sandbox.Set(str(ctx.Arg(1)), func(ctx *gisp.Context) interface{} {
 		return val
-	}
+	})
 	return val
 }
 
@@ -457,4 +460,43 @@ func Switch(ctx *gisp.Context) interface{} {
 		Index:       ctx.Index,
 		IsLiftPanic: ctx.IsLiftPanic,
 	})
+}
+
+// Fn Define a closure.
+// (fn (a b ...) (exp))
+func Fn(ctx *gisp.Context) interface{} {
+	return func(this *gisp.Context) interface{} {
+		if countStack(this) > MaxFnStackSize {
+			this.Error("call stack overflow")
+		}
+
+		closure := ctx.Sandbox.Create()
+
+		ast := ctx.AST.([]interface{})
+
+		args := ast[1].([]interface{})
+
+		for i, l := 0, len(args); i < l; i++ {
+			closure.Set(args[i].(string), this.Arg(i+1))
+		}
+
+		return gisp.Run(&gisp.Context{
+			AST:     ast[2],
+			Sandbox: closure,
+			ENV:     ctx.ENV,
+			Parent:  this,
+			Index:   ctx.Index,
+		})
+	}
+}
+
+func countStack(node *gisp.Context) int {
+	count := 0
+
+	for node != nil {
+		count++
+		node = node.Parent
+	}
+
+	return count
 }

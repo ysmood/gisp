@@ -11,55 +11,55 @@ import (
 
 func TestGet(t *testing.T) {
 	out, _ := gisp.RunJSON(`["get", { "a": 1.1 }, "a"]`, &gisp.Context{
-		Sandbox: map[string]interface{}{
+		Sandbox: gisp.New(gisp.Box{
 			"get": lib.Get,
-		},
+		}),
 	})
 	assert.Equal(t, float64(1.1), out)
 }
 
 func TestGetPath(t *testing.T) {
 	out, _ := gisp.RunJSON(`["get", { "a": {"b": [1,2,3]} }, "a.b.1"]`, &gisp.Context{
-		Sandbox: map[string]interface{}{
+		Sandbox: gisp.New(gisp.Box{
 			"get": lib.Get,
-		},
+		}),
 	})
 	assert.Equal(t, float64(2), out)
 }
 
 func TestGetDefault(t *testing.T) {
 	out, _ := gisp.RunJSON(`["get", {}, 1]`, &gisp.Context{
-		Sandbox: map[string]interface{}{
+		Sandbox: gisp.New(gisp.Box{
 			"get": lib.Get,
-		},
+		}),
 	})
 	assert.Equal(t, nil, out)
 }
 
 func TestGetArrDefault(t *testing.T) {
 	out, _ := gisp.RunJSON(`["get", [], "10"]`, &gisp.Context{
-		Sandbox: map[string]interface{}{
+		Sandbox: gisp.New(gisp.Box{
 			"get": lib.Get,
-		},
+		}),
 	})
 	assert.Equal(t, nil, out)
 }
 
 func TestGetDefaultValFromObj(t *testing.T) {
 	out, _ := gisp.RunJSON(`["get", { "a": 1.1 }, "b", false]`, &gisp.Context{
-		Sandbox: map[string]interface{}{
+		Sandbox: gisp.New(gisp.Box{
 			"get": lib.Get,
-		},
+		}),
 	})
 	assert.Equal(t, false, out)
 }
 
 func TestGetDefaultValFromArr(t *testing.T) {
 	out, _ := gisp.RunJSON(`["get", ["$", []], "10", false]`, &gisp.Context{
-		Sandbox: map[string]interface{}{
+		Sandbox: gisp.New(gisp.Box{
 			"$":   lib.Raw,
 			"get": lib.Get,
-		},
+		}),
 	})
 	assert.Equal(t, false, out)
 }
@@ -68,10 +68,10 @@ func TestSet(t *testing.T) {
 	out, _ := gisp.RunJSON(`
 		["set", ["$", {}], "a.b", "ok"]
 	`, &gisp.Context{
-		Sandbox: map[string]interface{}{
+		Sandbox: gisp.New(gisp.Box{
 			"$":   lib.Raw,
 			"set": lib.Set,
-		},
+		}),
 	})
 	exp, _ := djson.Decode([]byte(`
 		{"a": {"b": "ok"}}
@@ -83,10 +83,10 @@ func TestSetArr(t *testing.T) {
 	out, _ := gisp.RunJSON(`
 		["set", ["|"], "1.2", "ok"]
 	`, &gisp.Context{
-		Sandbox: map[string]interface{}{
+		Sandbox: gisp.New(gisp.Box{
 			"|":   lib.Arr,
 			"set": lib.Set,
-		},
+		}),
 	})
 	exp, _ := djson.Decode([]byte(`
 		[null, [null, null, "ok"]]
@@ -98,10 +98,10 @@ func TestSetObj(t *testing.T) {
 	out, _ := gisp.RunJSON(`
 		["set", [":", "a", 10], "a.2", "ok"]
 	`, &gisp.Context{
-		Sandbox: map[string]interface{}{
+		Sandbox: gisp.New(gisp.Box{
 			":":   lib.Dict,
 			"set": lib.Set,
-		},
+		}),
 	})
 	exp, _ := djson.Decode([]byte(`
 		{"a": [null, null, "ok"]}
@@ -114,12 +114,12 @@ func TestSetCircular(t *testing.T) {
 		["def", "a", [":"]],
 		["set", ["a"], "a", ["a"]]
 	]`, &gisp.Context{
-		Sandbox: map[string]interface{}{
+		Sandbox: gisp.New(gisp.Box{
 			":":   lib.Dict,
 			"do":  lib.Do,
 			"def": lib.Def,
 			"set": lib.Set,
-		},
+		}),
 	})
 	exp, _ := djson.Decode([]byte(`
 		{"a": {}}
@@ -137,11 +137,11 @@ func TestSwitchHasExpr(t *testing.T) {
 			["default", 3]
 		]
 	]`, &gisp.Context{
-		Sandbox: map[string]interface{}{
+		Sandbox: gisp.New(gisp.Box{
 			"switch": lib.Switch,
 			"do":     lib.Do,
 			"def":    lib.Def,
-		},
+		}),
 	})
 	exp, _ := djson.Decode([]byte(`
 		2
@@ -159,11 +159,11 @@ func TestSwitchNoExpr(t *testing.T) {
 			["default", 3]
 		]
 	]`, &gisp.Context{
-		Sandbox: map[string]interface{}{
+		Sandbox: gisp.New(gisp.Box{
 			"switch": lib.Switch,
 			"do":     lib.Do,
 			"def":    lib.Def,
-		},
+		}),
 	})
 	exp, _ := djson.Decode([]byte(`
 		2
@@ -181,14 +181,39 @@ func TestSwitchDefault(t *testing.T) {
 			["default", 3]
 		]
 	]`, &gisp.Context{
-		Sandbox: map[string]interface{}{
+		Sandbox: gisp.New(gisp.Box{
 			"switch": lib.Switch,
 			"do":     lib.Do,
 			"def":    lib.Def,
-		},
+		}),
 	})
 	exp, _ := djson.Decode([]byte(`
 		3
 	`))
 	assert.Equal(t, exp, out)
+}
+
+func TestFn(t *testing.T) {
+	out, _ := gisp.RunJSON(`
+		["do",
+			["def",
+				"foo",
+				["fn", ["a"],
+					["+", ["a"], 1]
+				]
+			],
+
+			["foo", 1]
+		]
+		
+	`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"do":  lib.Do,
+			"fn":  lib.Fn,
+			"def": lib.Def,
+			"+":   lib.Add,
+		}),
+	})
+
+	assert.Equal(t, float64(2), out)
 }

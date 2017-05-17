@@ -8,7 +8,7 @@ import (
 )
 
 func TestJSON(t *testing.T) {
-	sandbox := gisp.Sandbox{
+	sandbox := gisp.New(gisp.Box{
 		"+": func(ctx *gisp.Context) float64 {
 			a := ctx.ArgNum(1)
 			b := ctx.ArgNum(2)
@@ -19,7 +19,7 @@ func TestJSON(t *testing.T) {
 			b := ctx.ArgNum(2)
 			return a - b
 		},
-	}
+	})
 
 	out, _ := gisp.RunJSON(`["-", ["+", 5, 1], ["+", 1, 1]]`, &gisp.Context{
 		Sandbox: sandbox,
@@ -29,7 +29,7 @@ func TestJSON(t *testing.T) {
 }
 
 func TestTypes(t *testing.T) {
-	sandbox := gisp.Sandbox{
+	sandbox := gisp.New(gisp.Box{
 		"$": func(g *gisp.Context) interface{} {
 			return g.AST.([]interface{})[1]
 		},
@@ -42,7 +42,7 @@ func TestTypes(t *testing.T) {
 				g.ArgStr(5),
 			}
 		},
-	}
+	})
 
 	out, _ := gisp.RunJSON(`["echo", 1.2, true, ["$", []], {}, "ok"]`, &gisp.Context{
 		Sandbox: sandbox,

@@ -4,8 +4,50 @@ import (
 	"encoding/json"
 )
 
+// Box which contains the raw userspace values
+type Box map[string]interface{}
+
 // Sandbox sandbox
-type Sandbox map[string]interface{}
+// It implements prototype design pattern
+type Sandbox struct {
+	dict   Box
+	parent *Sandbox
+}
+
+// New create a new sandbox
+func New(dict Box) *Sandbox {
+	return &Sandbox{
+		dict: dict,
+	}
+}
+
+// Create create a new sandbox which dirives from current sandbox
+func (sandbox *Sandbox) Create() *Sandbox {
+	return &Sandbox{
+		dict:   Box{},
+		parent: sandbox,
+	}
+}
+
+// Get get property from the prototype chain
+func (sandbox *Sandbox) Get(name string) (interface{}, bool) {
+	for sandbox != nil {
+		val, has := sandbox.dict[name]
+
+		if has {
+			return val, true
+		}
+
+		sandbox = sandbox.parent
+	}
+
+	return nil, false
+}
+
+// Set set property
+func (sandbox *Sandbox) Set(name string, val interface{}) {
+	sandbox.dict[name] = val
+}
 
 // Context context
 type Context struct {
@@ -13,7 +55,7 @@ type Context struct {
 	AST interface{}
 
 	// The functions exposed to the vm
-	Sandbox Sandbox
+	Sandbox *Sandbox
 
 	// The state exposed to the functions in the vm
 	// It's not directly visible to user.
@@ -85,7 +127,7 @@ func Run(ctx *Context) interface{} {
 			var has bool
 
 			if isStr {
-				val, has = ctx.Sandbox[name]
+				val, has = ctx.Sandbox.Get(name)
 			}
 
 			if has {
