@@ -110,6 +110,7 @@ func Run(ctx *Context) interface{} {
 		switch val.(type) {
 		case func(*Context):
 			val.(func(*Context))(ctx)
+			return nil
 		case func(*Context) float64:
 			return val.(func(*Context) float64)(ctx)
 		case func(*Context) string:
@@ -136,6 +137,7 @@ func Run(ctx *Context) interface{} {
 				switch val.(type) {
 				case func(*Context):
 					val.(func(*Context))(ctx)
+					return nil
 				case func(*Context) float64:
 					return val.(func(*Context) float64)(ctx)
 				case func(*Context) string:

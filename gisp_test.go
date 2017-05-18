@@ -40,6 +40,22 @@ func TestReturnFn(t *testing.T) {
 	assert.Equal(t, float64(3), out)
 }
 
+func TestVoidFn(t *testing.T) {
+	a := 0
+
+	sandbox := gisp.New(gisp.Box{
+		"foo": func(ctx *gisp.Context) {
+			a = 1
+		},
+	})
+
+	gisp.RunJSON(`["foo"]`, &gisp.Context{
+		Sandbox: sandbox,
+	})
+
+	assert.Equal(t, 1, a)
+}
+
 func TestNewClosure(t *testing.T) {
 	sandbox := gisp.New(gisp.Box{
 		"foo": 1,
