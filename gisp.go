@@ -45,8 +45,23 @@ func (sandbox *Sandbox) Get(name string) (interface{}, bool) {
 }
 
 // Set set property
+// Update the nearest one to root, if nothing found a new property
+// will be created on current closure
 func (sandbox *Sandbox) Set(name string, val interface{}) {
-	sandbox.dict[name] = val
+	curr := sandbox
+
+	for sandbox != nil {
+		_, has := sandbox.dict[name]
+
+		if has {
+			sandbox.dict[name] = val
+			return
+		}
+
+		sandbox = sandbox.parent
+	}
+
+	curr.dict[name] = val
 }
 
 // Context context
