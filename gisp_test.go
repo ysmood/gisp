@@ -14,10 +14,10 @@ func TestReadmeExample(t *testing.T) {
 	code := `["+", 1, ["*", 2, 2]]`
 
 	out, _ := gisp.RunJSON(code, &gisp.Context{
-		Sandbox: gisp.Sandbox{
+		Sandbox: gisp.New(gisp.Box{
 			"+": lib.Add,
 			"*": lib.Multiply,
-		},
+		}),
 	})
 
 	fmt.Println(out) // 5
