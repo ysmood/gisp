@@ -217,3 +217,35 @@ func TestFn(t *testing.T) {
 
 	assert.Equal(t, float64(2), out)
 }
+
+func TestFor(t *testing.T) {
+	out, err := gisp.RunJSON(`
+		["do",
+			["def", "sum", 0],
+
+			["for", "i", "el", ["arr"],
+				["redef", "sum", ["+", ["sum"], ["el"]]]
+			],
+
+			["sum"]
+		]
+		
+	`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"do":    lib.Do,
+			"|":     lib.Arr,
+			"def":   lib.Def,
+			"redef": lib.Redef,
+			"+":     lib.Add,
+			"for":   lib.For,
+
+			"arr": []interface{}{float64(1), float64(2), float64(3)},
+		}),
+	})
+
+	if err != nil {
+		panic(err)
+	}
+
+	assert.Equal(t, float64(6), out)
+}

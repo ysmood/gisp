@@ -193,10 +193,17 @@ func Do(ctx *gisp.Context) interface{} {
 	return ret
 }
 
-// Def ...
+// Def define
 func Def(ctx *gisp.Context) interface{} {
 	val := ctx.Arg(2)
 	ctx.Sandbox.Set(str(ctx.Arg(1)), val)
+	return val
+}
+
+// Redef redefine
+func Redef(ctx *gisp.Context) interface{} {
+	val := ctx.Arg(2)
+	ctx.Sandbox.Reset(str(ctx.Arg(1)), val)
 	return val
 }
 
@@ -498,3 +505,55 @@ func countStack(node *gisp.Context) int {
 
 	return count
 }
+
+// For loop function that works like golang
+// Example: (for i item (arr) (append (list) (item)))
+func For(ctx *gisp.Context) {
+	keyName := ctx.ArgStr(1)
+	valName := ctx.ArgStr(2)
+	arr := ctx.Arg(3)
+	ast := ctx.AST.([]interface{})
+
+	closure := ctx.Sandbox.Create()
+
+	switch arr.(type) {
+	case []interface{}:
+		for i, item := range arr.([]interface{}) {
+			closure.Set(keyName, i)
+			closure.Set(valName, item)
+
+			gisp.Run(&gisp.Context{
+				AST:     ast[4],
+				Sandbox: closure,
+				ENV:     ctx.ENV,
+				Parent:  ctx,
+				Index:   ctx.Index,
+			})
+		}
+
+	case map[string]interface{}:
+		for i, item := range arr.(map[string]interface{}) {
+			closure.Set(keyName, i)
+			closure.Set(valName, item)
+
+			gisp.Run(&gisp.Context{
+				AST:     ast[4],
+				Sandbox: closure,
+				ENV:     ctx.ENV,
+				Parent:  ctx,
+				Index:   ctx.Index,
+			})
+		}
+
+	default:
+		ctx.Error("cannot iterate non-collection type")
+	}
+}
+
+// // Concat ...
+// func Concat(ctx *gisp.Context) []interface{} {
+// }
+
+// // Append ...
+// func Append(ctx *gisp.Context) []interface{} {
+// }
