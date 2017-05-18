@@ -196,9 +196,7 @@ func Do(ctx *gisp.Context) interface{} {
 // Def ...
 func Def(ctx *gisp.Context) interface{} {
 	val := ctx.Arg(2)
-	ctx.Sandbox.Set(str(ctx.Arg(1)), func(ctx *gisp.Context) interface{} {
-		return val
-	})
+	ctx.Sandbox.Set(str(ctx.Arg(1)), val)
 	return val
 }
 
