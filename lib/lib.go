@@ -550,10 +550,26 @@ func For(ctx *gisp.Context) {
 	}
 }
 
-// // Concat ...
-// func Concat(ctx *gisp.Context) []interface{} {
-// }
+// Concat ...
+func Concat(ctx *gisp.Context) []interface{} {
+	arr := []interface{}{}
 
-// // Append ...
-// func Append(ctx *gisp.Context) []interface{} {
-// }
+	for i, l := 1, ctx.Len(); i < l; i++ {
+		el := ctx.Arg(i)
+
+		switch el.(type) {
+		case []interface{}:
+			arr = append(arr, el.([]interface{})...)
+
+		default:
+			arr = append(arr, el)
+		}
+	}
+
+	return arr
+}
+
+// Append ...
+func Append(ctx *gisp.Context) []interface{} {
+	return append(ctx.ArgArr(1), ctx.Arg(2))
+}

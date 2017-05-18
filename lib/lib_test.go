@@ -249,3 +249,36 @@ func TestFor(t *testing.T) {
 
 	assert.Equal(t, float64(6), out)
 }
+
+func TestConcat(t *testing.T) {
+	out, _ := gisp.RunJSON(`
+		["concat", ["arr1"], ["arr2"], ["item"]]
+	`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"concat": lib.Concat,
+			"arr1":   []interface{}{float64(1), float64(2)},
+			"arr2":   []interface{}{float64(3), "4"},
+			"item":   "ok",
+		}),
+	})
+	exp, _ := djson.Decode([]byte(`
+		[1, 2, 3, "4", "ok"]
+	`))
+	assert.Equal(t, exp, out)
+}
+
+func TestAppend(t *testing.T) {
+	out, _ := gisp.RunJSON(`
+		["append", ["arr1"], ["item"]]
+	`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"append": lib.Append,
+			"arr1":   []interface{}{float64(1), float64(2)},
+			"item":   "ok",
+		}),
+	})
+	exp, _ := djson.Decode([]byte(`
+		[1, 2, "ok"]
+	`))
+	assert.Equal(t, exp, out)
+}
