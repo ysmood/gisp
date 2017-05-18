@@ -89,7 +89,12 @@ func TestDeepClosure(t *testing.T) {
 
 	c4.Set("foo", 2)
 	val2, _ := c1.Get("foo")
-	assert.Equal(t, 2, val2)
+	assert.Equal(t, 1, val2)
+
+	c3.Reset("foo", 2)
+	val3, _ := c1.Get("foo")
+	assert.Equal(t, 2, val3)
+
 }
 
 func TestEmpty(t *testing.T) {
