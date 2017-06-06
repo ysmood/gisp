@@ -9,6 +9,24 @@ import (
 	"github.com/ysmood/gisp/lib"
 )
 
+func TestThrow(t *testing.T) {
+	defer func() {
+		err := recover()
+
+		if err != nil {
+			assert.Equal(t, "err", err.(gisp.Error).Message)
+		} else {
+			panic("should throw error")
+		}
+	}()
+
+	gisp.RunJSON(`["throw", "err"]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"throw": lib.Throw,
+		}),
+	})
+}
+
 func TestGet(t *testing.T) {
 	out, _ := gisp.RunJSON(`["get", { "a": 1.1 }, "a"]`, &gisp.Context{
 		Sandbox: gisp.New(gisp.Box{

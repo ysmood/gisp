@@ -15,6 +15,11 @@ func Raw(ctx *gisp.Context) interface{} {
 	return ctx.AST.([]interface{})[1]
 }
 
+// Throw ...
+func Throw(ctx *gisp.Context) {
+	ctx.Error(ctx.ArgStr(1))
+}
+
 // Get ...
 func Get(ctx *gisp.Context) interface{} {
 	obj := ctx.Arg(1)
