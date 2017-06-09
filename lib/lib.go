@@ -366,19 +366,27 @@ func Not(ctx *gisp.Context) interface{} {
 // And ...
 func And(ctx *gisp.Context) interface{} {
 	// for the laziness, we shouldn't use "ctx.Arg(1).(bool) && ctx.Arg(2).(bool)"
-	if ctx.Arg(1).(bool) {
-		return ctx.Arg(2).(bool)
+	l := ctx.Len()
+	for i := 1; i < l; i++ {
+		if !ctx.ArgBool(i) {
+			return false
+		}
 	}
-	return false
+
+	return true
 }
 
 // Or ...
 func Or(ctx *gisp.Context) interface{} {
 	// for the laziness, we shouldn't use "ctx.Arg(1).(bool) || ctx.Arg(2).(bool)"
-	if ctx.Arg(1).(bool) {
-		return true
+	l := ctx.Len()
+	for i := 1; i < l; i++ {
+		if ctx.ArgBool(i) {
+			return true
+		}
 	}
-	return ctx.Arg(2).(bool)
+
+	return false
 }
 
 // Switch ...
