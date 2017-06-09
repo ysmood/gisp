@@ -36,6 +36,32 @@ func TestGet(t *testing.T) {
 	assert.Equal(t, float64(1.1), out)
 }
 
+func TestLenArr(t *testing.T) {
+	out, _ := gisp.RunJSON(`["len", ["$", [1, 2, 3]]]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"len": lib.Len,
+			"$":   lib.Raw,
+		}),
+	})
+	assert.Equal(t, float64(3), out)
+}
+
+func TestLenObj(t *testing.T) {
+	out, _ := gisp.RunJSON(`["len", { "a": 1 }]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"len": lib.Len,
+		}),
+	})
+	assert.Equal(t, float64(1), out)
+}
+func TestLenStr(t *testing.T) {
+	out, _ := gisp.RunJSON(`["len", "test"]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"len": lib.Len,
+		}),
+	})
+	assert.Equal(t, float64(4), out)
+}
 func TestGetPath(t *testing.T) {
 	out, _ := gisp.RunJSON(`["get", { "a": {"b": [1,2,3]} }, "a.b.1"]`, &gisp.Context{
 		Sandbox: gisp.New(gisp.Box{

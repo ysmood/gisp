@@ -555,6 +555,23 @@ func For(ctx *gisp.Context) {
 	}
 }
 
+// Len get size of array, map or string.
+// If type is not supported return -1.
+func Len(ctx *gisp.Context) float64 {
+	obj := ctx.Arg(1)
+
+	switch obj.(type) {
+	case []interface{}:
+		return float64(len(obj.([]interface{})))
+	case map[string]interface{}:
+		return float64(len(obj.(map[string]interface{})))
+	case string:
+		return float64(len(obj.(string)))
+	default:
+		return -1
+	}
+}
+
 // Concat ...
 func Concat(ctx *gisp.Context) []interface{} {
 	arr := []interface{}{}
