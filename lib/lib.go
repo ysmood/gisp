@@ -154,7 +154,7 @@ func Str(ctx *gisp.Context) interface{} {
 
 // Includes ...
 func Includes(ctx *gisp.Context) interface{} {
-	list := ctx.Arg(1).([]interface{})
+	list := ctx.ArgArr(1)
 	target := ctx.Arg(2)
 
 	for _, item := range list {
@@ -214,7 +214,7 @@ func Redef(ctx *gisp.Context) interface{} {
 
 // If ...
 func If(ctx *gisp.Context) interface{} {
-	if ctx.Arg(1).(bool) {
+	if ctx.ArgBool(1) {
 		return ctx.Arg(2)
 	}
 	return ctx.Arg(3)
@@ -267,34 +267,57 @@ func Add(ctx *gisp.Context) (ret interface{}) {
 	return
 }
 
-// Minus ...
-func Minus(ctx *gisp.Context) interface{} {
-	return ctx.Arg(1).(float64) - ctx.Arg(2).(float64)
+// Minus (- 10 2 3)
+func Minus(ctx *gisp.Context) float64 {
+	l := ctx.Len()
+	o := ctx.ArgNum(1)
+	for i := 2; i < l; i++ {
+		o -= ctx.ArgNum(i)
+	}
+	return o
 }
 
-// Multiply ...
-func Multiply(ctx *gisp.Context) interface{} {
-	return ctx.Arg(1).(float64) * ctx.Arg(2).(float64)
+// Multiply (* 1 2 3)
+func Multiply(ctx *gisp.Context) float64 {
+	l := ctx.Len()
+	o := ctx.ArgNum(1)
+	for i := 2; i < l; i++ {
+		o *= ctx.ArgNum(i)
+	}
+	return o
 }
 
 // Power ...
 func Power(ctx *gisp.Context) interface{} {
-	return math.Pow(ctx.Arg(1).(float64), ctx.Arg(2).(float64))
+	return math.Pow(ctx.ArgNum(1), ctx.ArgNum(2))
 }
 
 // Divide ...
 func Divide(ctx *gisp.Context) interface{} {
-	return ctx.Arg(1).(float64) / ctx.Arg(2).(float64)
+	l := ctx.Len()
+	o := ctx.ArgNum(1)
+	for i := 2; i < l; i++ {
+		o /= ctx.ArgNum(i)
+	}
+	return o
 }
 
 // Mod ...
 func Mod(ctx *gisp.Context) interface{} {
-	return math.Mod(ctx.Arg(1).(float64), ctx.Arg(2).(float64))
+	return math.Mod(ctx.ArgNum(1), ctx.ArgNum(2))
 }
 
 // Eq ...
 func Eq(ctx *gisp.Context) interface{} {
-	return ctx.Arg(1) == ctx.Arg(2)
+	l := ctx.Len()
+	last := ctx.Arg(1)
+	for i := 2; i < l; i++ {
+		if last != ctx.Arg(i) {
+			return false
+		}
+	}
+
+	return true
 }
 
 // Ne ...
@@ -304,63 +327,115 @@ func Ne(ctx *gisp.Context) interface{} {
 
 // Lt ...
 func Lt(ctx *gisp.Context) interface{} {
+	l := ctx.Len()
 	a := ctx.Arg(1)
-	b := ctx.Arg(2)
-	switch a.(type) {
-	case string:
-		return a.(string) < b.(string)
-	case float64:
-		return a.(float64) < b.(float64)
-	default:
-		return fmt.Sprint(a) < fmt.Sprint(b)
+
+	for i := 2; i < l; i++ {
+		b := ctx.Arg(i)
+		switch a.(type) {
+		case string:
+			if a.(string) >= b.(string) {
+				return false
+			}
+		case float64:
+			if a.(float64) >= b.(float64) {
+				return false
+			}
+		default:
+			if fmt.Sprint(a) >= fmt.Sprint(b) {
+				return false
+			}
+		}
+		a = b
 	}
+
+	return true
 }
 
 // Le ...
 func Le(ctx *gisp.Context) interface{} {
+	l := ctx.Len()
 	a := ctx.Arg(1)
-	b := ctx.Arg(2)
-	switch a.(type) {
-	case string:
-		return a.(string) <= b.(string)
-	case float64:
-		return a.(float64) <= b.(float64)
-	default:
-		return fmt.Sprint(a) <= fmt.Sprint(b)
+
+	for i := 2; i < l; i++ {
+		b := ctx.Arg(i)
+		switch a.(type) {
+		case string:
+			if a.(string) > b.(string) {
+				return false
+			}
+		case float64:
+			if a.(float64) > b.(float64) {
+				return false
+			}
+		default:
+			if fmt.Sprint(a) > fmt.Sprint(b) {
+				return false
+			}
+		}
+		a = b
 	}
+
+	return true
 }
 
 // Gt ...
 func Gt(ctx *gisp.Context) interface{} {
+	l := ctx.Len()
 	a := ctx.Arg(1)
-	b := ctx.Arg(2)
-	switch a.(type) {
-	case string:
-		return a.(string) > b.(string)
-	case float64:
-		return a.(float64) > b.(float64)
-	default:
-		return fmt.Sprint(a) > fmt.Sprint(b)
+
+	for i := 2; i < l; i++ {
+		b := ctx.Arg(i)
+		switch a.(type) {
+		case string:
+			if a.(string) <= b.(string) {
+				return false
+			}
+		case float64:
+			if a.(float64) <= b.(float64) {
+				return false
+			}
+		default:
+			if fmt.Sprint(a) <= fmt.Sprint(b) {
+				return false
+			}
+		}
+		a = b
 	}
+
+	return true
 }
 
 // Ge ...
 func Ge(ctx *gisp.Context) interface{} {
+	l := ctx.Len()
 	a := ctx.Arg(1)
-	b := ctx.Arg(2)
-	switch a.(type) {
-	case string:
-		return a.(string) >= b.(string)
-	case float64:
-		return a.(float64) >= b.(float64)
-	default:
-		return fmt.Sprint(a) >= fmt.Sprint(b)
+
+	for i := 2; i < l; i++ {
+		b := ctx.Arg(i)
+		switch a.(type) {
+		case string:
+			if a.(string) < b.(string) {
+				return false
+			}
+		case float64:
+			if a.(float64) < b.(float64) {
+				return false
+			}
+		default:
+			if fmt.Sprint(a) < fmt.Sprint(b) {
+				return false
+			}
+		}
+		a = b
 	}
+
+	return true
 }
 
 // Not ...
 func Not(ctx *gisp.Context) interface{} {
-	return !ctx.Arg(1).(bool)
+	return !ctx.ArgBool(1)
 }
 
 // And ...

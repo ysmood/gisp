@@ -64,6 +64,150 @@ func TestLenStr(t *testing.T) {
 	assert.Equal(t, float64(4), out)
 }
 
+func TestMinus(t *testing.T) {
+	out, _ := gisp.RunJSON(`["-", 10, 1, 1]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"-": lib.Minus,
+		}),
+	})
+	assert.Equal(t, float64(8), out)
+}
+
+func TestMultiply(t *testing.T) {
+	out, _ := gisp.RunJSON(`["*", 2, 2, 2]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"*": lib.Multiply,
+		}),
+	})
+	assert.Equal(t, float64(8), out)
+}
+
+func TestPower(t *testing.T) {
+	out, _ := gisp.RunJSON(`["**", 2, 2]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"**": lib.Power,
+		}),
+	})
+	assert.Equal(t, float64(4), out)
+}
+
+func TestDivide(t *testing.T) {
+	out, _ := gisp.RunJSON(`["/", 8, 2, 2]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"/": lib.Divide,
+		}),
+	})
+	assert.Equal(t, float64(2), out)
+}
+
+func TestEq(t *testing.T) {
+	out, _ := gisp.RunJSON(`["==", 2, 2, 3]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"==": lib.Eq,
+		}),
+	})
+	assert.Equal(t, false, out)
+}
+
+func TestEq2(t *testing.T) {
+	out, _ := gisp.RunJSON(`["==", 2, 2, 2]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"==": lib.Eq,
+		}),
+	})
+	assert.Equal(t, true, out)
+}
+
+func TestNe(t *testing.T) {
+	out, _ := gisp.RunJSON(`["!=", 2, 3]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"!=": lib.Ne,
+		}),
+	})
+	assert.Equal(t, true, out)
+}
+
+func TestNe2(t *testing.T) {
+	out, _ := gisp.RunJSON(`["!=", 2, 2]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"!=": lib.Ne,
+		}),
+	})
+	assert.Equal(t, false, out)
+}
+
+func TestLt(t *testing.T) {
+	out, _ := gisp.RunJSON(`["<", 1, 2, 3]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"<": lib.Lt,
+		}),
+	})
+	assert.Equal(t, true, out)
+}
+
+func TestLt2(t *testing.T) {
+	out, _ := gisp.RunJSON(`["<", 1, 2, 1]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"<": lib.Lt,
+		}),
+	})
+	assert.Equal(t, false, out)
+}
+
+func TestLe(t *testing.T) {
+	out, _ := gisp.RunJSON(`["<=", 1, 1, 2]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"<=": lib.Le,
+		}),
+	})
+	assert.Equal(t, true, out)
+}
+
+func TestLe2(t *testing.T) {
+	out, _ := gisp.RunJSON(`["<=", 1, 1, 0]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"<=": lib.Le,
+		}),
+	})
+	assert.Equal(t, false, out)
+}
+
+func TestGt(t *testing.T) {
+	out, _ := gisp.RunJSON(`[">", 10, 5, 1]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			">": lib.Gt,
+		}),
+	})
+	assert.Equal(t, true, out)
+}
+
+func TestGt2(t *testing.T) {
+	out, _ := gisp.RunJSON(`[">", 10, 5, 5]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			">": lib.Le,
+		}),
+	})
+	assert.Equal(t, false, out)
+}
+
+func TestGe(t *testing.T) {
+	out, _ := gisp.RunJSON(`[">=", 10, 10, 1]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			">=": lib.Ge,
+		}),
+	})
+	assert.Equal(t, true, out)
+}
+
+func TestGe2(t *testing.T) {
+	out, _ := gisp.RunJSON(`[">=", 10, 5, 7]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			">=": lib.Ge,
+		}),
+	})
+	assert.Equal(t, false, out)
+}
+
 func TestAnd(t *testing.T) {
 	out, _ := gisp.RunJSON(`["&&", true, true, false]`, &gisp.Context{
 		Sandbox: gisp.New(gisp.Box{
