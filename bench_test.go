@@ -6,6 +6,7 @@ import (
 
 	"github.com/a8m/djson"
 	"github.com/ysmood/gisp"
+	"github.com/ysmood/gisp/lib"
 	lua "github.com/yuin/gopher-lua"
 )
 
@@ -69,6 +70,124 @@ func BenchmarkGisp(b *testing.B) {
 			AST:     ast,
 			Sandbox: sandbox,
 		})
+	}
+}
+
+func BenchmarkComplexGisp(b *testing.B) {
+	code := []byte(`
+		[
+			"do",
+			[
+				"def",
+				"profession",
+				[
+					"|",
+					"debuglog",
+					"holmes",
+					"hotfix_metrics",
+					"hotfix_log",
+					"meituan-update",
+					"catchexception",
+					"anr",
+					"env",
+					"large_picture",
+					"QRCodeImg",
+					"hydra",
+					"flexbox",
+					"update-downloadmanager",
+					"aid",
+					"multidex",
+					"config_monitor",
+					"httpdns",
+					"timeout"
+				]
+			],
+			["def", "ret", [":"]],
+			[
+				"for",
+				"index",
+				"item",
+				[
+					"profession"
+				],
+				[
+					"set",
+					[
+						"ret"
+					],
+					[
+						"item"
+					],
+					[
+						":",
+						"commons",
+						"ok"
+					]
+				]
+			]
+		]
+	`)
+	ast, err := djson.Decode(code)
+
+	if err != nil {
+		panic(err)
+	}
+
+	sandbox := gisp.New(gisp.Box{
+		"do":  lib.Do,
+		"for": lib.For,
+		"def": lib.Def,
+		"set": lib.Set,
+		"get": lib.Get,
+		":":   lib.Dict,
+		"|":   lib.Arr,
+	})
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		gisp.Run(&gisp.Context{
+			AST:     ast,
+			Sandbox: sandbox,
+		})
+	}
+}
+
+func BenchmarkComplexGo(b *testing.B) {
+	program := func() interface{} {
+		profression := []string{
+			"debuglog",
+			"holmes",
+			"hotfix_metrics",
+			"hotfix_log",
+			"meituan-update",
+			"catchexception",
+			"anr",
+			"env",
+			"large_picture",
+			"QRCodeImg",
+			"hydra",
+			"flexbox",
+			"update-downloadmanager",
+			"aid",
+			"multidex",
+			"config_monitor",
+			"httpdns",
+			"timeout",
+		}
+
+		ret := map[string]interface{}{}
+
+		for _, el := range profression {
+			ret[el] = map[string]interface{}{
+				"commons": "ok",
+			}
+		}
+
+		return ret
+	}
+
+	for i := 0; i < b.N; i++ {
+		program()
 	}
 }
 
