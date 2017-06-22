@@ -168,10 +168,10 @@ func Includes(ctx *gisp.Context) interface{} {
 // Arr ...
 func Arr(ctx *gisp.Context) interface{} {
 	l := ctx.Len()
-	var arr []interface{}
+	arr := make([]interface{}, l-1)
 
 	for i := 1; i < l; i++ {
-		arr = append(arr, ctx.Arg(i))
+		arr[i-1] = ctx.Arg(i)
 	}
 
 	return arr

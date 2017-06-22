@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
+	"strings"
+
 	"github.com/a8m/djson"
 	"github.com/ysmood/gisp"
 	"github.com/ysmood/gisp/lib"
@@ -152,6 +154,7 @@ func BenchmarkComplexGisp(b *testing.B) {
 	}
 }
 
+// We can see that Gisp is only 4 times slower than the simplified Go code.
 func BenchmarkComplexGo(b *testing.B) {
 	program := func() interface{} {
 		profression := []string{
@@ -178,8 +181,14 @@ func BenchmarkComplexGo(b *testing.B) {
 		ret := map[string]interface{}{}
 
 		for _, el := range profression {
-			ret[el] = map[string]interface{}{
-				"commons": "ok",
+			// simulate the json path
+			paths := strings.Split(el, ".")
+
+			for _, p := range paths {
+				ret[p] = map[string]interface{}{
+					"commons": "ok",
+				}
+				break
 			}
 		}
 
