@@ -153,8 +153,13 @@ func Str(ctx *gisp.Context) interface{} {
 }
 
 // Includes ...
-func Includes(ctx *gisp.Context) interface{} {
-	list := ctx.ArgArr(1)
+func Includes(ctx *gisp.Context) bool {
+	list, isArr := ctx.Arg(1).([]interface{})
+
+	if !isArr {
+		return false
+	}
+
 	target := ctx.Arg(2)
 
 	for _, item := range list {
