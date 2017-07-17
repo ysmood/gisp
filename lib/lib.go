@@ -3,6 +3,7 @@ package lib
 import (
 	"fmt"
 	"math"
+	"strings"
 
 	"github.com/ysmood/gisp"
 )
@@ -682,4 +683,52 @@ func Concat(ctx *gisp.Context) []interface{} {
 // Append ...
 func Append(ctx *gisp.Context) []interface{} {
 	return append(ctx.ArgArr(1), ctx.Arg(2))
+}
+
+// Split ...
+func Split(ctx *gisp.Context) []interface{} {
+	arr := strings.Split(ctx.ArgStr(1), ctx.ArgStr(2))
+
+	ret := make([]interface{}, len(arr))
+
+	for i, el := range arr {
+		ret[i] = el
+	}
+
+	return ret
+}
+
+// Slice ...
+func Slice(ctx *gisp.Context) interface{} {
+	arr := ctx.Arg(1)
+
+	switch arr.(type) {
+	case string:
+		return arr.(string)[int(ctx.ArgNum(2)):int(ctx.ArgNum(3))]
+	case []interface{}:
+		return arr.([]interface{})[int(ctx.ArgNum(2)):int(ctx.ArgNum(3))]
+	default:
+		return nil
+	}
+}
+
+// IndexOf ...
+func IndexOf(ctx *gisp.Context) float64 {
+	arr := ctx.Arg(1)
+
+	switch arr.(type) {
+	case string:
+		return float64(strings.Index(arr.(string), ctx.ArgStr(2)))
+	case []interface{}:
+		list := arr.([]interface{})
+		target := ctx.Arg(2)
+		for i, el := range list {
+			if el == target {
+				return float64(i)
+			}
+		}
+		return -1
+	default:
+		return -1
+	}
 }

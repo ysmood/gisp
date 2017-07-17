@@ -508,3 +508,74 @@ func TestAppend(t *testing.T) {
 	`))
 	assert.Equal(t, exp, out)
 }
+
+func TestSplit(t *testing.T) {
+	out, _ := gisp.RunJSON(`
+		["split", "a.b.c", "."]
+	`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"split": lib.Split,
+		}),
+	})
+	exp, _ := djson.Decode([]byte(`
+		["a", "b", "c"]
+	`))
+	assert.Equal(t, exp, out)
+}
+
+func TestIndexOf(t *testing.T) {
+	out, _ := gisp.RunJSON(`
+		["indexOf", "abc", "b"]
+	`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"indexOf": lib.IndexOf,
+		}),
+	})
+	exp, _ := djson.Decode([]byte(`
+		1
+	`))
+	assert.Equal(t, exp, out)
+}
+
+func TestIndexOfNotFound(t *testing.T) {
+	out, _ := gisp.RunJSON(`
+		["indexOf", "abc", "x"]
+	`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"indexOf": lib.IndexOf,
+		}),
+	})
+	exp, _ := djson.Decode([]byte(`
+		-1
+	`))
+	assert.Equal(t, exp, out)
+}
+
+func TestSliceStr(t *testing.T) {
+	out, _ := gisp.RunJSON(`
+		["slice", "abc", 1, 3]
+	`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"slice": lib.Slice,
+		}),
+	})
+	exp, _ := djson.Decode([]byte(`
+		"bc"
+	`))
+	assert.Equal(t, exp, out)
+}
+
+func TestSliceArr(t *testing.T) {
+	out, _ := gisp.RunJSON(`
+		["slice", ["$", [1, 2, 3]], 1, 3]
+	`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"slice": lib.Slice,
+			"$":     lib.Raw,
+		}),
+	})
+	exp, _ := djson.Decode([]byte(`
+		[2, 3]
+	`))
+	assert.Equal(t, exp, out)
+}
