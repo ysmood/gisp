@@ -66,6 +66,12 @@ func TestClosureNames(t *testing.T) {
 
 	c4.Set("e", 5)
 
-	assert.Equal(t, []string{"e", "d", "b", "c", "a"}, c4.Names())
+	assert.Equal(t, gisp.Box{
+		"e": 5,
+		"d": 4,
+		"b": 2,
+		"c": 3,
+		"a": 1,
+	}, c4.Box())
 
 }

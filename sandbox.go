@@ -55,6 +55,21 @@ func (sandbox *Sandbox) Names() []string {
 	return names
 }
 
+// Box return flat dict
+func (sandbox *Sandbox) Box() Box {
+	box := Box{}
+
+	for sandbox != nil {
+		for k := range sandbox.dict {
+			box[k], _ = sandbox.Get(k)
+		}
+
+		sandbox = sandbox.parent
+	}
+
+	return box
+}
+
 // Set set property
 func (sandbox *Sandbox) Set(name string, val interface{}) {
 	sandbox.dict[name] = val
