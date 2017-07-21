@@ -253,6 +253,16 @@ func TestGetPath(t *testing.T) {
 	assert.Equal(t, float64(2), out)
 }
 
+func TestGetNum(t *testing.T) {
+	out, _ := gisp.RunJSON(`["get", ["|", 1, 2], 1]`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			"|":   lib.Arr,
+			"get": lib.Get,
+		}),
+	})
+	assert.Equal(t, float64(2), out)
+}
+
 func TestGetDefault(t *testing.T) {
 	out, _ := gisp.RunJSON(`["get", {}, 1]`, &gisp.Context{
 		Sandbox: gisp.New(gisp.Box{

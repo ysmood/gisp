@@ -68,6 +68,10 @@ func toJSONPath(pathRaw interface{}) (paths []interface{}) {
 		}
 	case []interface{}:
 		paths = pathRaw.([]interface{})
+	case float64:
+		paths = []interface{}{
+			uint64(pathRaw.(float64)),
+		}
 	default:
 		paths = []interface{}{}
 	}
