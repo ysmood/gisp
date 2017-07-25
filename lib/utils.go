@@ -26,6 +26,8 @@ func str(val interface{}) (str string) {
 		str = val.(string)
 	case float64:
 		str = f2s(val)
+	case []byte:
+		str = string(val.([]byte))
 	default:
 		str = fmt.Sprint(val)
 	}
