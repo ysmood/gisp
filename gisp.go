@@ -63,19 +63,6 @@ func Run(ctx *Context) interface{} {
 
 		// if val is function
 		switch val.(type) {
-		case func(*Context):
-			val.(func(*Context))(ctx)
-			return nil
-		case func(*Context) float64:
-			return val.(func(*Context) float64)(ctx)
-		case func(*Context) string:
-			return val.(func(*Context) string)(ctx)
-		case func(*Context) bool:
-			return val.(func(*Context) bool)(ctx)
-		case func(*Context) map[string]interface{}:
-			return val.(func(*Context) map[string]interface{})(ctx)
-		case func(*Context) []interface{}:
-			return val.(func(*Context) []interface{})(ctx)
 		case func(*Context) interface{}:
 			return val.(func(*Context) interface{})(ctx)
 
@@ -90,19 +77,6 @@ func Run(ctx *Context) interface{} {
 
 			if has {
 				switch val.(type) {
-				case func(*Context):
-					val.(func(*Context))(ctx)
-					return nil
-				case func(*Context) float64:
-					return val.(func(*Context) float64)(ctx)
-				case func(*Context) string:
-					return val.(func(*Context) string)(ctx)
-				case func(*Context) bool:
-					return val.(func(*Context) bool)(ctx)
-				case func(*Context) map[string]interface{}:
-					return val.(func(*Context) map[string]interface{})(ctx)
-				case func(*Context) []interface{}:
-					return val.(func(*Context) []interface{})(ctx)
 				case func(*Context) interface{}:
 					return val.(func(*Context) interface{})(ctx)
 				default:

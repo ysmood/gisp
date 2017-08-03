@@ -9,12 +9,12 @@ import (
 
 func TestJSON(t *testing.T) {
 	sandbox := gisp.New(gisp.Box{
-		"+": func(ctx *gisp.Context) float64 {
+		"+": func(ctx *gisp.Context) interface{} {
 			a := ctx.ArgNum(1)
 			b := ctx.ArgNum(2)
 			return a + b
 		},
-		"-": func(ctx *gisp.Context) float64 {
+		"-": func(ctx *gisp.Context) interface{} {
 			a := ctx.ArgNum(1)
 			b := ctx.ArgNum(2)
 			return a - b
@@ -33,7 +33,7 @@ func TestTypes(t *testing.T) {
 		"$": func(g *gisp.Context) interface{} {
 			return g.AST.([]interface{})[1]
 		},
-		"echo": func(g *gisp.Context) []interface{} {
+		"echo": func(g *gisp.Context) interface{} {
 			return []interface{}{
 				g.ArgNum(1),
 				g.ArgBool(2),

@@ -17,8 +17,9 @@ func Raw(ctx *gisp.Context) interface{} {
 }
 
 // Throw ...
-func Throw(ctx *gisp.Context) {
+func Throw(ctx *gisp.Context) interface{} {
 	ctx.Error(ctx.ArgStr(1))
+	return nil
 }
 
 // Get ...
@@ -154,7 +155,7 @@ func Str(ctx *gisp.Context) interface{} {
 }
 
 // Includes ...
-func Includes(ctx *gisp.Context) bool {
+func Includes(ctx *gisp.Context) interface{} {
 	list, isArr := ctx.Arg(1).([]interface{})
 
 	if !isArr {
@@ -274,7 +275,7 @@ func Add(ctx *gisp.Context) (ret interface{}) {
 }
 
 // Minus (- 10 2 3)
-func Minus(ctx *gisp.Context) float64 {
+func Minus(ctx *gisp.Context) interface{} {
 	l := ctx.Len()
 	o := ctx.ArgNum(1)
 	for i := 2; i < l; i++ {
@@ -284,7 +285,7 @@ func Minus(ctx *gisp.Context) float64 {
 }
 
 // Multiply (* 1 2 3)
-func Multiply(ctx *gisp.Context) float64 {
+func Multiply(ctx *gisp.Context) interface{} {
 	l := ctx.Len()
 	o := ctx.ArgNum(1)
 	for i := 2; i < l; i++ {
@@ -565,7 +566,15 @@ func Switch(ctx *gisp.Context) interface{} {
 // (fn (a b ...) (exp))
 func Fn(ctx *gisp.Context) interface{} {
 	return func(this *gisp.Context) interface{} {
-		if countStack(this) > MaxFnStackSize {
+		// count stack
+		node := this
+		count := 0
+		for node != nil {
+			count++
+			node = node.Parent
+		}
+
+		if count > MaxFnStackSize {
 			this.Error("call stack overflow")
 		}
 
@@ -589,20 +598,9 @@ func Fn(ctx *gisp.Context) interface{} {
 	}
 }
 
-func countStack(node *gisp.Context) int {
-	count := 0
-
-	for node != nil {
-		count++
-		node = node.Parent
-	}
-
-	return count
-}
-
 // For loop function that works like golang
 // Example: (for i item (arr) (append (list) (item)))
-func For(ctx *gisp.Context) {
+func For(ctx *gisp.Context) interface{} {
 	keyName := ctx.ArgStr(1)
 	valName := ctx.ArgStr(2)
 	arr := ctx.Arg(3)
@@ -642,11 +640,13 @@ func For(ctx *gisp.Context) {
 	default:
 		ctx.Error("cannot iterate non-collection type")
 	}
+
+	return nil
 }
 
 // Len get size of array, map or string.
 // If type is not supported return -1.
-func Len(ctx *gisp.Context) float64 {
+func Len(ctx *gisp.Context) interface{} {
 	obj := ctx.Arg(1)
 
 	switch obj.(type) {
@@ -662,7 +662,7 @@ func Len(ctx *gisp.Context) float64 {
 }
 
 // Concat ...
-func Concat(ctx *gisp.Context) []interface{} {
+func Concat(ctx *gisp.Context) interface{} {
 	arr := []interface{}{}
 
 	for i, l := 1, ctx.Len(); i < l; i++ {
@@ -681,12 +681,12 @@ func Concat(ctx *gisp.Context) []interface{} {
 }
 
 // Append ...
-func Append(ctx *gisp.Context) []interface{} {
+func Append(ctx *gisp.Context) interface{} {
 	return append(ctx.ArgArr(1), ctx.Arg(2))
 }
 
 // Split ...
-func Split(ctx *gisp.Context) []interface{} {
+func Split(ctx *gisp.Context) interface{} {
 	arr := strings.Split(ctx.ArgStr(1), ctx.ArgStr(2))
 
 	ret := make([]interface{}, len(arr))
@@ -713,7 +713,7 @@ func Slice(ctx *gisp.Context) interface{} {
 }
 
 // IndexOf ...
-func IndexOf(ctx *gisp.Context) float64 {
+func IndexOf(ctx *gisp.Context) interface{} {
 	arr := ctx.Arg(1)
 
 	switch arr.(type) {
