@@ -24,6 +24,12 @@ type Context struct {
 
 	// Whether auto lift sandbox panic with informal stack info or not
 	IsLiftPanic bool
+
+	// Pre-hook before each run
+	PreRun func(*Context)
+
+	// Post-hook after each run
+	PostRun func(*Context)
 }
 
 // Error ...
@@ -49,6 +55,10 @@ func (ctx *Context) liftPanic() {
 
 // Run entrance
 func Run(ctx *Context) interface{} {
+	if ctx.PreRun != nil {
+		ctx.PreRun(ctx)
+	}
+
 	switch ctx.AST.(type) {
 	case []interface{}:
 		if ctx.IsLiftPanic {
@@ -56,6 +66,10 @@ func Run(ctx *Context) interface{} {
 		}
 
 		if ctx.Len() == 0 {
+			// don't use defer, we don't want to calc the time of panic
+			if ctx.PostRun != nil {
+				ctx.PostRun(ctx)
+			}
 			return nil
 		}
 
@@ -64,6 +78,9 @@ func Run(ctx *Context) interface{} {
 		// if val is function
 		switch val.(type) {
 		case func(*Context) interface{}:
+			if ctx.PostRun != nil {
+				ctx.PostRun(ctx)
+			}
 			return val.(func(*Context) interface{})(ctx)
 
 		// if val is string
@@ -78,8 +95,14 @@ func Run(ctx *Context) interface{} {
 			if has {
 				switch val.(type) {
 				case func(*Context) interface{}:
+					if ctx.PostRun != nil {
+						ctx.PostRun(ctx)
+					}
 					return val.(func(*Context) interface{})(ctx)
 				default:
+					if ctx.PostRun != nil {
+						ctx.PostRun(ctx)
+					}
 					return val
 				}
 			}
@@ -89,6 +112,9 @@ func Run(ctx *Context) interface{} {
 		}
 	}
 
+	if ctx.PostRun != nil {
+		ctx.PostRun(ctx)
+	}
 	return ctx.AST
 }
 

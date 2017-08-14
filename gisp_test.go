@@ -70,6 +70,41 @@ func TestVal(t *testing.T) {
 	assert.Equal(t, "ok", out)
 }
 
+func TestPreRun(t *testing.T) {
+	sandbox := gisp.New(gisp.Box{
+		"+": lib.Add,
+	})
+
+	env := 0
+
+	gisp.RunJSON(`["+", 1, ["+", 1, 1]]`, &gisp.Context{
+		Sandbox: sandbox,
+		ENV:     &env,
+		PreRun: func(ctx *gisp.Context) {
+			*ctx.ENV.(*int) = *ctx.ENV.(*int) + 1
+		},
+	})
+
+	assert.Equal(t, 7, env)
+}
+
+func TestPostRun(t *testing.T) {
+	sandbox := gisp.New(gisp.Box{
+		"+": lib.Add,
+	})
+
+	env := 0
+
+	gisp.RunJSON(`["+", 1, ["+", 1, 1]]`, &gisp.Context{
+		Sandbox: sandbox,
+		ENV:     &env,
+		PostRun: func(ctx *gisp.Context) {
+			*ctx.ENV.(*int) = *ctx.ENV.(*int) + 1
+		},
+	})
+
+	assert.Equal(t, 7, env)
+}
 func TestAST(t *testing.T) {
 	code := []byte(`["*", ["*", 2, 5], ["*", 9, 3]]`)
 	ast, _ := djson.Decode(code)

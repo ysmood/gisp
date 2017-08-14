@@ -30,6 +30,8 @@ func (ctx *Context) Arg(index int) interface{} {
 		Index:       index,
 		Parent:      ctx,
 		IsLiftPanic: ctx.IsLiftPanic,
+		PreRun:      ctx.PreRun,
+		PostRun:     ctx.PostRun,
 	})
 }
 

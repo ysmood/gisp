@@ -526,6 +526,8 @@ func Switch(ctx *gisp.Context) interface{} {
 			Parent:      ctx.Parent,
 			Index:       ctx.Index,
 			IsLiftPanic: ctx.IsLiftPanic,
+			PreRun:      ctx.PreRun,
+			PostRun:     ctx.PostRun,
 		})
 		if hasExpr {
 			if itemValue == expr {
@@ -536,6 +538,8 @@ func Switch(ctx *gisp.Context) interface{} {
 					Parent:      ctx.Parent,
 					Index:       ctx.Index,
 					IsLiftPanic: ctx.IsLiftPanic,
+					PreRun:      ctx.PreRun,
+					PostRun:     ctx.PostRun,
 				})
 			}
 		} else {
@@ -547,6 +551,8 @@ func Switch(ctx *gisp.Context) interface{} {
 					Parent:      ctx.Parent,
 					Index:       ctx.Index,
 					IsLiftPanic: ctx.IsLiftPanic,
+					PreRun:      ctx.PreRun,
+					PostRun:     ctx.PostRun,
 				})
 			}
 		}
@@ -559,6 +565,8 @@ func Switch(ctx *gisp.Context) interface{} {
 		Parent:      ctx.Parent,
 		Index:       ctx.Index,
 		IsLiftPanic: ctx.IsLiftPanic,
+		PreRun:      ctx.PreRun,
+		PostRun:     ctx.PostRun,
 	})
 }
 
@@ -594,6 +602,8 @@ func Fn(ctx *gisp.Context) interface{} {
 			ENV:     ctx.ENV,
 			Parent:  this,
 			Index:   ctx.Index,
+			PreRun:  ctx.PreRun,
+			PostRun: ctx.PostRun,
 		})
 	}
 }
@@ -620,6 +630,8 @@ func For(ctx *gisp.Context) interface{} {
 				ENV:     ctx.ENV,
 				Parent:  ctx,
 				Index:   ctx.Index,
+				PreRun:  ctx.PreRun,
+				PostRun: ctx.PostRun,
 			})
 		}
 
@@ -634,6 +646,8 @@ func For(ctx *gisp.Context) interface{} {
 				ENV:     ctx.ENV,
 				Parent:  ctx,
 				Index:   ctx.Index,
+				PreRun:  ctx.PreRun,
+				PostRun: ctx.PostRun,
 			})
 		}
 
