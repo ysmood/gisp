@@ -124,9 +124,15 @@ func (ctx *Context) Error(msg string) {
 	node := ctx
 
 	for node != nil {
-		name := node.AST.([]interface{})[0]
-		stack = append(stack, name, node.Index)
-		node = node.Parent
+		switch node.AST.(type) {
+		case []interface{}:
+			name := node.AST.([]interface{})[0]
+			stack = append(stack, name, node.Index)
+			node = node.Parent
+		default:
+			stack = append(stack, node.AST, node.Index)
+			node = node.Parent
+		}
 	}
 
 	panic(Error{
