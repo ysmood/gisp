@@ -9,7 +9,10 @@ import (
 )
 
 // MaxFnStackSize ...
-const MaxFnStackSize = 17
+var MaxFnStackSize = int(17)
+
+// MaxStringLen ...
+var MaxStringLen = int(1e6)
 
 // Raw ...
 func Raw(ctx *gisp.Context) interface{} {
@@ -269,6 +272,13 @@ func Add(ctx *gisp.Context) (ret interface{}) {
 			}
 		default:
 			ret = fmt.Sprint(ret) + fmt.Sprint(arg)
+		}
+
+		switch ret.(type) {
+		case string:
+			if len(ret.(string)) > MaxStringLen {
+				ctx.Error(fmt.Sprintf("max string length exceeded %v", MaxStringLen))
+			}
 		}
 	}
 	return
