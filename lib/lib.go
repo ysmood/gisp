@@ -3,6 +3,7 @@ package lib
 import (
 	"fmt"
 	"math"
+	"strconv"
 	"strings"
 
 	"github.com/ysmood/gisp"
@@ -56,16 +57,25 @@ func Get(ctx *gisp.Context) interface{} {
 				return defaultVal
 			}
 		case uint64:
-			arr, ok := obj.([]interface{})
+			switch obj.(type) {
+			case []interface{}:
+				arr := obj.([]interface{})
+				if int(p.(uint64)) >= len(arr) {
+					return defaultVal
+				}
+				obj = arr[p.(uint64)]
+			case map[string]interface{}:
+				var has bool
+				dict := obj.(map[string]interface{})
+				index := strconv.FormatUint(p.(uint64), 10)
+				obj, has = dict[index]
 
-			if !ok {
+				if !has {
+					return defaultVal
+				}
+			default:
 				return defaultVal
 			}
-
-			if int(p.(uint64)) >= len(arr) {
-				return defaultVal
-			}
-			obj = arr[p.(uint64)]
 		default:
 			return defaultVal
 		}
@@ -76,6 +86,9 @@ func Get(ctx *gisp.Context) interface{} {
 // Set ...
 func Set(ctx *gisp.Context) interface{} {
 	obj := ctx.Arg(1)
+	if obj == nil {
+		return nil
+	}
 	pathRaw := ctx.Arg(2)
 
 	// TODO: optimize circular detection
@@ -95,10 +108,11 @@ func Set(ctx *gisp.Context) interface{} {
 		switch p.(type) {
 		case string:
 			index := p.(string)
+			self := cur.(map[string]interface{})
 			if i == last {
-				cur.(map[string]interface{})[index] = val
+				self[index] = val
 			} else {
-				next := cur.(map[string]interface{})[index]
+				next := self[index]
 
 				switch next.(type) {
 				case map[string]interface{}:
@@ -110,17 +124,16 @@ func Set(ctx *gisp.Context) interface{} {
 						next = map[string]interface{}{}
 					}
 
-					cur.(map[string]interface{})[index] = next
+					self[index] = next
 				}
 				cur = next
 			}
 
 		case uint64:
 			index := p.(uint64)
-			arr := cur.([]interface{})
-			if i == last {
-				arr[index] = val
-			} else {
+			switch cur.(type) {
+			case []interface{}:
+				arr := cur.([]interface{})
 				l := uint64(len(arr))
 				if index >= l {
 					arr = append(arr, make([]interface{}, index-l+1)...)
@@ -128,25 +141,151 @@ func Set(ctx *gisp.Context) interface{} {
 						obj = arr
 					}
 				}
-				next := arr[index]
+				if i == last {
+					arr[index] = val
+				} else {
+					next := arr[index]
 
-				switch next.(type) {
-				case map[string]interface{}:
-				case []interface{}:
-				default:
-					if isUint64(paths[i+1]) {
-						next = make([]interface{}, paths[i+1].(uint64)+1)
-					} else {
-						next = map[string]interface{}{}
+					switch next.(type) {
+					case map[string]interface{}:
+					case []interface{}:
+					default:
+						if isUint64(paths[i+1]) {
+							next = make([]interface{}, paths[i+1].(uint64)+1)
+						} else {
+							next = map[string]interface{}{}
+						}
+
+						arr[index] = next
 					}
-
-					arr[index] = next
+					cur = next
 				}
-				cur = next
+			case map[string]interface{}:
+				item := strconv.FormatUint(index, 10)
+				self := cur.(map[string]interface{})
+				if i == last {
+					self[item] = val
+				} else {
+					next := self[item]
+
+					switch next.(type) {
+					case map[string]interface{}:
+					case []interface{}:
+					default:
+						if isUint64(paths[i+1]) {
+							next = make([]interface{}, int(paths[i+1].(uint64)+1))
+						} else {
+							next = map[string]interface{}{}
+						}
+
+						self[item] = next
+					}
+					cur = next
+				}
 			}
 
 		default:
 			ctx.Error(fmt.Sprintf("wrong path type: %T\nvalue: %v", p, p))
+		}
+	}
+	return obj
+}
+
+// Del ...
+func Del(ctx *gisp.Context) interface{} {
+	obj := ctx.Arg(1)
+	pathRaw := ctx.Arg(2)
+
+	paths := toJSONPath(pathRaw)
+
+	l := len(paths)
+	last := l - 1
+	cur := obj
+	var prev interface{}
+	var prevKey interface{}
+
+	for i := 0; i < l; i++ {
+		p := paths[i]
+		switch p.(type) {
+		case string:
+			var has bool
+			dict, ok := cur.(map[string]interface{})
+
+			if !ok {
+				return obj
+			}
+
+			key := p.(string)
+
+			if i == last {
+				delete(dict, key)
+				return obj
+			}
+
+			prev, prevKey = cur, key
+			cur, has = dict[key]
+
+			if !has {
+				return obj
+			}
+
+		case uint64:
+			switch cur.(type) {
+			case []interface{}:
+				arr := cur.([]interface{})
+				arrLen := len(arr)
+				index := int(p.(uint64))
+				if index >= arrLen {
+					return obj
+				}
+				if i == last {
+					var newArr []interface{}
+
+					if index == arrLen-1 {
+						newArr = arr[:index]
+					} else if index == 0 {
+						newArr = arr[index+1:]
+					} else {
+						newArr = append(arr[:index], arr[index+1:]...)
+					}
+
+					if prev == nil {
+						return newArr
+					}
+
+					switch prevKey.(type) {
+					case string:
+						prevDict := prev.(map[string]interface{})
+						prevDict[prevKey.(string)] = newArr
+					case uint64:
+						prevArr := prev.([]interface{})
+						prevArr[prevKey.(uint64)] = newArr
+					}
+
+					return obj
+				}
+				prev, prevKey = cur, index
+				cur = arr[p.(uint64)]
+			case map[string]interface{}:
+				var has bool
+				dict := cur.(map[string]interface{})
+				key := strconv.FormatUint(p.(uint64), 10)
+
+				if i == last {
+					delete(dict, key)
+					return obj
+				}
+				prev, prevKey = cur, key
+				cur, has = dict[key]
+
+				if !has {
+					return obj
+				}
+			default:
+				return obj
+			}
+		default:
+			return obj
 		}
 	}
 	return obj

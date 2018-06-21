@@ -345,6 +345,21 @@ func TestSetObj(t *testing.T) {
 	assert.Equal(t, exp, out)
 }
 
+func TestSetObjAndNumberKey(t *testing.T) {
+	out, _ := gisp.RunJSON(`
+		["set", [":"], "1", "ok"]
+	`, &gisp.Context{
+		Sandbox: gisp.New(gisp.Box{
+			":":   lib.Dict,
+			"set": lib.Set,
+		}),
+	})
+	exp, _ := djson.Decode([]byte(`
+		{"1": "ok"}
+	`))
+	assert.Equal(t, exp, out)
+}
+
 func TestSetCircular(t *testing.T) {
 	out, _ := gisp.RunJSON(`["do",
 		["def", "a", [":"]],
