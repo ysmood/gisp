@@ -19,10 +19,12 @@ func main() {
 	code := `["+", 1, ["*", 2, 2]]`
 
 	out, _ := gisp.RunJSON(code, &gisp.Context{
-		Sandbox: gisp.Sandbox{
+		Sandbox: gisp.New(gisp.Box{
 			"+": lib.Add,
-			"*": lib.Multiply,
-		},
+			"*": func (ctx *gisp.Context) interface{} {
+				return  ctx.ArgNum(1) * ctx.ArgNum(2)
+			},
+		}),
 	})
 
 	fmt.Println(out) // 5
