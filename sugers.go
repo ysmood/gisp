@@ -7,7 +7,7 @@ func RunJSON(code string, ctx *Context) (interface{}, error) {
 	return RunJSONRaw([]byte(code), ctx)
 }
 
-// RunJSON json entrance
+// RunJSONRaw json entrance
 func RunJSONRaw(code []byte, ctx *Context) (ret interface{}, err error) {
 	ast, err := djson.Decode(code)
 	ctx.AST = ast
