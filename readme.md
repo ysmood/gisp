@@ -7,29 +7,7 @@ Read js implementation for detailed info: https://github.com/ysmood/nisp
 
 ## Example
 
-```go
-import (
-    "github.com/ysmood/gisp"
-)
-
-func main() {
-	//  arithmetic expression: 1 + (2 * 2)
-	//    function expression: add(1, multiply(2, 2))
-	// gisp (json) expression: ["+", 1, ["*", 2, 2]]
-	code := `["+", 1, ["*", 2, 2]]`
-
-	out, _ := gisp.RunJSON(code, &gisp.Context{
-		Sandbox: gisp.New(gisp.Box{
-			"+": lib.Add,
-			"*": func (ctx *gisp.Context) interface{} {
-				return  ctx.ArgNum(1) * ctx.ArgNum(2)
-			},
-		}),
-	})
-
-	fmt.Println(out) // 5
-}
-```
+See the examples folder.
 
 ## Compare to Lua
 
