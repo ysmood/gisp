@@ -5,10 +5,6 @@ dynamic responses (such as AB test response) every day on our servers.
 
 Read js implementation for detailed info: https://github.com/ysmood/nisp
 
-## Example
-
-See the examples folder.
-
 ## Compare to Lua
 
 Compare to normal gopher-lua, gisp is about 90 times faster with a much smaller memory footprint.

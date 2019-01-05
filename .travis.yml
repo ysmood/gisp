@@ -2,5 +2,3 @@ language: go
 
 go:
   - "1.11.x"
-
-script: go test -v ./... && for i in examples/*; do go run "$i";done

@@ -1,4 +1,4 @@
-package main
+package gisp_test
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/ysmood/gisp/lib"
 )
 
-func main() {
+func Example() {
 	//  arithmetic expression: 1 + (2 * 3)
 	//    function expression: add(1, multiply(2, 3))
 	// gisp (json) expression: ["+", 1, ["*", 2, 3]]
@@ -26,5 +26,6 @@ func main() {
 		}),
 	})
 
-	fmt.Println(out) // print 7
+	fmt.Println(out)
+	// Output: 7
 }
